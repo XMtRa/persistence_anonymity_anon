@@ -1,0 +1,15 @@
+name: "persistence_anonymity"
+output_dir: "."
+navbar:
+  title: "Home"
+  type: inverse
+  left:
+    - text: "Power Analysis"
+      href: power_analysis.html
+  right:
+    - text: "Source Code"
+      icon: fa-lg fa-github
+      href: https://github.com/XMtRa/privacy_calc_exp_anon
+output:
+  html_document:
+    theme: cosmo

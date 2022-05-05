@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+archive/
+power_analysis_cache/
+site_libs/.DS_Store

@@ -1,0 +1,673 @@
+---
+title: "Power Analysis"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = T, warning = F)
+set.seed(1)
+options(scipen = 10000, digits = 2)
+```
+
+```{r packages, message=F, results='hide', cache = F}
+library(BayesFactor)
+library(brms)
+library(broom)
+library(ggplot2)
+library(knitr)
+library(magrittr) # test
+library(tidyverse)
+```
+
+# Background
+
+Here, we run some power analysis for a study on online political participation. 
+In the study, people use a social networking site (discord) on which they discuss political matters. 
+Participants will communicate in groups of 20 people each. This number is fixed for theory-related reasons, that is medium scale group communication.
+The dependent variable is how much people discuss (measured via _number of words_).
+We're interested how different SNS designs affect communication.
+
+The study design is as follows:
+
+ - The website is experimentally manipulated (2 x 2 design). 
+    - First, the _persistence_ of the comments is manipulated (permanent vs. ephemeral);
+    - Second, the _identification_ of the users is manipulated (identifiable vs. anonymous);
+ - To increase generalizability, the groups will discuss one of three _topics_: corona politics, environment, gender.
+ - All is between-person
+
+So these are 2 (identification) x 2 (persistence) experimental factors and a 3-way generalization factor (topic), resulting in a minimum of 12 groups.
+Hence, the minimum sample size 12 x 20 = 240 participants.
+
+To calculate power, the question now is how often do we need to _repeat_ this design to achieve sufficient power? Once, twice, thrice, etc? Hence, the factor to change/affect power is _repetition_, ranging from 1 to 5. Note that financing would only allow 4 repetitions, so the fifth is out of curiosity.
+
+# Custom functions
+## Generate design
+
+```{r functions}
+generate_design <- function(groupsize, 
+                            persis, 
+                            ident, 
+                            topics, 
+                            repetition, 
+                            ...){
+  
+  # function generates underlying (empty) datastructure
+  
+  # count number of groups
+  groups <- persis * ident * topics * repetition
+  
+  # make datastructure
+  expand.grid(
+    participant = 1:groupsize, 
+    persistence = 1:persis - 1, # -1 to make binary
+    identification = 1:ident - 1, 
+    topic = 1:topics,
+    repetition = 1:repetition) %>% 
+    as.data.frame() %>% 
+    rownames_to_column("id") %>% 
+    mutate(
+      group = rep(c(1:groups), each = groupsize))
+}
+```
+
+## Simulate data
+
+```{r}
+sim_d <- function(d_frame, 
+                  seed, # make results reproducible
+                  effects, # vector of effects we anticipate
+                  sd, 
+                  groupsize, 
+                  ...){
+  
+  # function to simulate data
+
+  # set.seed(seed)  # uncomment to make results reproducible
+  
+  # compute how many participants per cell (exp. condition)
+  n_cell <- groupsize_n * topics_n * repetition_n
+  
+  # create the DV. 
+  # For now, this will be standardized, bc. of lack of concrete data
+  d_frame$words <- NA # create variable that'll be filled next
+  for(i in 1 : repetition_n) {
+    d_frame[d_frame$persistence == 0 & d_frame$identification == 0 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers0_iden_0_m"], sd)
+    d_frame[d_frame$persistence == 0 & d_frame$identification == 1 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers0_iden_1_m"], sd)
+    d_frame[d_frame$persistence == 1 & d_frame$identification == 0 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers1_iden_0_m"], sd)
+    d_frame[d_frame$persistence == 1 & d_frame$identification == 1 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers1_iden_1_m"], sd)
+  }
+    
+  return(d_frame)
+}
+```
+
+## Analyze data
+
+```{r}
+analyze_d <- function(object, approach, ...) {
+
+  # function to analyze data and to extract results
+  
+  # get means
+  means <- group_by(object, persistence, identification) %>% 
+    summarize(mean = mean(words), .groups = 'drop')
+  
+  results <- data.frame(
+    reps = repetition_n,
+    n = nrow(object), 
+    per0_ide0_m = filter(means, persistence == 0, identification == 0)$mean,
+    per0_ide1_m = filter(means, persistence == 0, identification == 1)$mean,
+    per1_ide0_m = filter(means, persistence == 1, identification == 0)$mean,
+    per1_ide1_m = filter(means, persistence == 1, identification == 1)$mean
+  )
+
+  
+  if(approach == "frequentist"){
+    
+    # get estimates from regression
+    fit <- lm(words ~ persistence + identification, object)
+    fit_rslt <- tidy(fit)
+  
+    # combine result
+    results <- cbind(
+      results,
+      persistence_est = fit_rslt[fit_rslt$term == "persistence",]$estimate,
+      persistence_p = fit_rslt[fit_rslt$term == "persistence",]$p.value,
+      identification_est = fit_rslt[fit_rslt$term == "identification",]$estimate,
+      identification_p = fit_rslt[fit_rslt$term == "identification",]$p.value
+    )
+  } 
+  
+  if(approach == "bayes_factor") {
+    
+    # compute bayes factor
+    bf <- BayesFactor::regressionBF(words ~ persistence + identification, object, progress = F)
+    
+    # extract bayes factor
+    bf_pers <- extractBF(bf)["persistence", ]$bf
+    bf_ident <- extractBF(bf)["identification", ]$bf
+    
+    # combine results
+    results <- cbind(
+      results,
+      bf_pers = bf_pers,
+      bf_ident = bf_ident
+    )
+  }
+  return(results)
+}
+```
+
+## Design and simulate
+
+```{r}
+des_sim_fit <- function(...){
+  
+  # function to report and extract results
+  
+  d_frame <- generate_design(...)
+  d <- sim_d(d_frame, ...)
+  analyze_d(d, ...)
+}
+```
+
+## Estimate power
+
+```{r}
+est_pow <- function(sims_n, approach, ...){
+  # function to run analyse sims_n times
+
+  tibble(sim = 1:sims_n) %>% 
+  mutate(
+    effect = map(sim, 
+                 des_sim_fit, 
+                 groupsize = groupsize_n, 
+                 persis = persis_n, 
+                 ident = ident_n, 
+                 topics = topics_n, 
+                 repetition = repetition_n, 
+                 effects = effects_est, 
+                 sd = sd_est,
+                 approach = approach)
+    ) %>%
+  unnest(effect) %>%
+  as.data.frame()
+}
+```
+
+# Study design
+
+```{r}
+# study design
+groupsize_n   <- 20
+persis_n      <- 2
+ident_n       <- 2 
+topics_n      <- 3
+
+# minimum sample size
+sample_size <- groupsize_n * persis_n * ident_n * topics_n
+```
+
+We define our study design as follows:
+
+- `r groupsize_n` participants per group
+- `r persis_n` persistence conditions
+- `r ident_n` identification conditions
+- `r topics_n` different topics to be discussed
+- `r sample_size` minimum sample size
+
+# Define effect size
+
+We then need to define likely effects. Problem is, we don't have good estimates of actual, raw date. To simplify, we assume normal distribution, a mean of zero and a standard deviation of one. 
+We can hence think of effects in terms of Cohen's d: .2 = small, .5 = medium, and .8 = large.
+
+|              | persistent | ephemeral |
+|--------------|:----------:|:---------:|
+| identifiable |    -.40    |   -.20    |
+| anonymous    |    -.20    |     0     |
+
+This should lead to a main effect of persistence of d = -.20 and a main effect of identifiability of d = -.20.
+
+```{r}
+pers0_iden_0_m <- 0
+pers0_iden_1_m <- -.2
+pers1_iden_0_m <- -.2
+pers1_iden_1_m <- -.4
+effects_est <- c(pers0_iden_0_m, pers0_iden_1_m, pers1_iden_0_m, pers1_iden_1_m)
+names(effects_est) <- c("pers0_iden_0_m", "pers0_iden_1_m", "pers1_iden_0_m", "pers1_iden_1_m")
+sd_est <- 1
+```
+
+# Test run
+
+To see if our functions work, let's make a test run with only one repetition.
+
+```{r}
+repetition_n <- 1
+```
+
+
+## Set-up
+
+We first create an empty data frame, in which we will then later simulate the data.
+
+```{r results='hide'}
+# create design frame
+d_frame <- generate_design(
+  groupsize  = groupsize_n,
+  persis     = persis_n,  
+  ident      = ident_n,     
+  topics     = topics_n,  
+  repetition = repetition_n
+  )
+d_frame
+```
+
+Check if data-frame is alright.
+
+```{r results='markup'}
+xtabs(~persistence + identification + topic + repetition, d_frame)
+```
+
+Allocation of participants to experimental groups worked just fine.
+
+## Simulate data
+
+Let's create a single data-set and analyze it.
+
+```{r}
+d <- sim_d(d_frame, seed = 1, effects_est, sd_est, groupsize_n)
+```
+
+## Analyse data
+
+Let's check if means were created alright:
+
+```{r}
+d %>% 
+  group_by(persistence, identification) %>% 
+  summarize(mean = mean(words), .groups = 'drop') %>% 
+  kable()
+```
+
+Sample size small and single study, but general tendency seems to be alright.
+
+Let's also quickly run a regression.
+
+```{r}
+fit <- lm(words ~ persistence + identification, d)
+summary(fit)
+```
+
+Results look reasonable. Both persistence and identification reduce disclosure.
+
+# Power analysis
+## Set-Up
+
+```{r}
+n_sim <- 1000
+n_reps <- 5
+```
+
+We simulate `r n_sim` data sets for the power analyses. 
+Up to `r n_reps` times will the set-up be repeated.
+
+## Small effects
+### Frequentist
+#### Run analyses
+
+Let's next run our actual power analysis, using the effect sizes defined above (small standardized effects).
+
+We run a power analysis with `r n_sim` simulations per design. We test `r n_reps` designs, that is 1 to `r n_reps` repetitions.
+
+```{r}
+# create empy data frame
+columns <- c("sim", "reps", "per0_ide0_m", "per0_ide1_m", 
+             "per1_ide0_m", "per1_ide1_m", "persistence_est", 
+             "persistence_p", "identification_est", "identification_p", "n")
+sims_freq_s <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(sims_freq_s) = columns
+
+t1 <- Sys.time()
+for(i in 1 : n_reps){
+  repetition_n  <- i
+  sims_freq_s <- rbind(sims_freq_s, est_pow(approach = "frequentist", sims_n = n_sim))
+}
+t2 <- Sys.time()
+t2 - t1
+```
+
+#### Visualization
+
+Let's inspect the results. First persistence:
+
+```{r}
+ggplot(sims_freq_s) +
+  geom_point(aes(sim, persistence_est, color = persistence_p < .05), 
+             size = .2, alpha = .5) + 
+  scale_color_manual(values = c("darkgrey", "blue")) +
+  facet_wrap(facets = "reps", nrow = 1) +
+  labs(color = "significant")
+```
+
+Shows that with more repetitions, effect size move closer to actual population value.
+
+To make sure, let's next check identification -- should provide identical results.
+
+```{r}
+ggplot(sims_freq_s) +
+  geom_point(aes(sim, identification_est, color = identification_p < .05), 
+             size = .2, alpha = .5) + 
+  scale_color_manual(values = c("darkgrey", "blue")) +
+  facet_wrap(facets = "reps", nrow = 1) +
+  labs(color = "significant")
+```
+
+Looks good. 
+
+#### Cell means & main effects
+
+Next, we compute the average means in the four cells averaged across simulations, plus the two main effects.
+This is more of a sanity check to see if our population values can be reproduced.
+
+```{r}
+sims_freq_s %>% 
+  group_by(reps) %>% 
+  summarise(per0_ide0 = mean(per0_ide0_m),
+            per0_ide1 = mean(per0_ide1_m),
+            per1_ide0 = mean(per1_ide0_m),
+            per1_ide1 = mean(per1_ide1_m),
+            persistence = mean(persistence_est), 
+            identification = mean(identification_est)
+            ) %>% 
+  as.data.frame() %>% 
+  kable()
+```
+
+Shows that the means resemble those we defined a priori. Same for main effects.
+
+#### Power estimates
+
+Now, let's compute power for each number of replication.
+
+```{r}
+power_freq_s <- sims_freq_s %>% 
+  group_by(reps) %>% 
+  summarise(n = max(n),
+            persistence = sum(persistence_p < .05 & persistence_est < 0) / n_sim,
+            identification = sum(identification_p < .05 & identification_est < 0) / n_sim)
+kable(power_freq_s)
+```
+
+```{r}
+dat_fr_s <- pivot_longer(power_freq_s, c(-reps, -n), names_to = "manipulation", values_to = "effect")
+power_fig <- ggplot(dat_fr_s, aes(reps, effect, color = manipulation)) +
+  geom_point(alpha = .9) +
+  scale_x_discrete(limits = c(1:n_reps))
+power_fig
+```
+
+
+If we replicate the study at least 5 times, then we get more than 80% power.
+
+### Bayesian
+
+Next, we analyze the data using Bayes factors.
+
+#### Test run
+
+We first do a test run.
+
+```{r}
+bf <- BayesFactor::regressionBF(words ~ persistence + identification, d)
+summary(bf)
+```
+
+#### Run analyses
+
+We then run the power analyses.
+
+```{r}
+# create empy data frame
+columns <- c("sim", "reps", "n", "per0_ide0_m", "per0_ide1_m", 
+             "per1_ide0_m", "per1_ide1_m", "BF_pers", "BF_ident")
+sims_bf_s <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(sims_bf_s) = columns
+
+t1 <- Sys.time()
+for(i in 1 : n_reps){
+  repetition_n  <- i
+  sims_bf_s <- rbind(sims_bf_s, est_pow(approach = "bayes_factor", sims_n = n_sim))
+}
+t2 <- Sys.time()
+t2 - t1
+```
+
+#### Power estimates
+
+We report how often the _Bayes Factor was above 10_, hence very noteworthy.
+
+```{r}
+power_bf_s <- sims_bf_s %>% 
+  group_by(reps) %>% 
+  summarise(`bf_ident > 10` = sum(bf_ident > 10) / n_sim,
+            `bf_pers > 10` = sum(bf_pers > 10) / n_sim,
+            n = max(n))
+kable(power_bf_s)
+```
+
+## Small-to-medium effects
+
+Let's next rerun our power analysis, using slightly larger effect sized (small to medium).
+
+```{r}
+pers0_iden_0_m <- 0
+pers0_iden_1_m <- -.35
+pers1_iden_0_m <- -.35
+pers1_iden_1_m <- -.7
+effects_est <- c(pers0_iden_0_m, pers0_iden_1_m, pers1_iden_0_m, pers1_iden_1_m)
+names(effects_est) <- c("pers0_iden_0_m", "pers0_iden_1_m", "pers1_iden_0_m", "pers1_iden_1_m")
+sd_est <- 1
+```
+
+### Frequentist
+#### Run analyses
+
+Everything as above, but now assuming larger effects. 
+
+```{r results='hide'}
+# create empy data frame
+columns <- c("sim", "reps", "per0_ide0_m", "per0_ide1_m", 
+             "per1_ide0_m", "per1_ide1_m", "persistence_est", 
+             "persistence_p", "identification_est", "identification_p", "n")
+sims_freq_sm <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(sims_freq_sm) = columns
+
+t1 <- Sys.time()
+for(i in 1 : n_reps){
+  repetition_n  <- i
+  sims_freq_sm <- rbind(sims_freq_sm, est_pow(approach = "frequentist", sims_n = n_sim))
+}
+t2 <- Sys.time()
+t2 - t1
+```
+
+#### Visualization
+
+Let's inspect the results. First persistence:
+
+```{r}
+ggplot(sims_freq_sm) +
+  geom_point(aes(sim, persistence_est, color = persistence_p < .05), 
+             size = .2, alpha = .5) + 
+  scale_color_manual(values = c("darkgrey", "blue")) +
+  facet_wrap(facets = "reps", nrow = 1) +
+  labs(color = "significant")
+```
+
+Shows that with more repetitions, effect size moves closer to actual population value.
+
+To make sure, let's next check identification -- should provide identical results.
+
+```{r}
+ggplot(sims_freq_sm) +
+  geom_point(aes(sim, identification_est, color = identification_p < .05), 
+             size = .2, alpha = .5) + 
+  scale_color_manual(values = c("darkgrey", "blue")) +
+  facet_wrap(facets = "reps", nrow = 1) +
+  labs(color = "significant")
+```
+
+Looks good. 
+
+#### Cell means & main effects
+
+Next, we compute the average means in the four cells averaged across simulations, plus the two main effects.
+This is more of a sanity check to see if our population values can be reproduced.
+
+```{r}
+sims_freq_sm %>% 
+  group_by(reps) %>% 
+  summarise(per0_ide0 = mean(per0_ide0_m),
+            per0_ide1 = mean(per0_ide1_m),
+            per1_ide0 = mean(per1_ide0_m),
+            per1_ide1 = mean(per1_ide1_m),
+            persistence = mean(persistence_est), 
+            identification = mean(identification_est)
+            ) %>% 
+  kable()
+```
+
+Shows that the means resemble those we defined a priori. Same for main effects.
+
+#### Power estimates
+
+Now, let's compute power for each number of replication.
+
+```{r}
+power_freq_sm <- sims_freq_sm %>% 
+  group_by(reps) %>% 
+  summarise(persistence = sum(persistence_p < .05 & persistence_est < 0) / n_sim,
+            identification = sum(identification_p < .05 & identification_est < 0) / n_sim,
+            n = max(n))
+kable(power_freq_sm)
+```
+
+If we replicate the study at least 3 times, then we get more than 80% power.
+
+```{r}
+dat_fr_sm <- pivot_longer(power_freq_sm, c(-reps, -n), names_to = "manipulation", values_to = "effect")
+power_fig <- ggplot(dat_fr_sm, aes(reps, effect, color = manipulation)) +
+  geom_point(alpha = .9) +
+  scale_x_discrete(limits = c(1:n_reps))
+power_fig
+```
+
+### Bayesian
+#### Run analyses
+
+```{r}
+# create empy data frame
+columns <- c("sim", "reps", "n", "per0_ide0_m", "per0_ide1_m", 
+             "per1_ide0_m", "per1_ide1_m", "BF_pers", "BF_ident")
+sims_bf_sm <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
+colnames(sims_bf_sm) = columns
+
+t1 <- Sys.time()
+for(i in 1 : n_reps){
+  repetition_n  <- i
+  sims_bf_sm <- rbind(sims_bf_sm, est_pow(approach = "bayes_factor", sims_n = n_sim))
+}
+t2 <- Sys.time()
+t2 - t1
+```
+
+#### Power estimates
+
+We next report how often the Bayes Factor was above 10, hence very noteworthy.
+
+```{r}
+power_bf_sm <- sims_bf_sm %>% 
+  group_by(reps) %>% 
+  summarise(`bf_ident > 10` = sum(bf_ident > 10) / n_sim,
+            `bf_pers > 10` = sum(bf_pers > 10) / n_sim,
+            n = max(n))
+kable(power_bf_sm)
+```
+
+With four repetitions, the Bayes Factor is `r power_bf_sm %>% filter(reps == 4) %>% select("bf_ident > 10") * 100 %>% round(0)`, hence power is high.
+
+# Summary
+## Tables
+
+For small effects: 
+
+```{r}
+tab_s <- cbind(
+  Replications = power_freq_s$reps,
+  N = power_freq_s$n,
+  pers_power = power_freq_s$persistence,
+  ident_power = power_freq_s$identification,
+  pers_bf = power_bf_s$`bf_pers > 10`,
+  ident_bf = power_bf_s$`bf_ident > 10`
+)
+kable(tab_s)
+```
+
+For small-to-medium effects
+
+```{r}
+tab_sm <- cbind(
+  Replications = power_freq_sm$reps,
+  N = power_freq_sm$n,
+  pers_power = power_freq_sm$persistence, 
+  ident_power = power_freq_sm$identification,
+  pers_bf = power_bf_sm$`bf_pers > 10`,
+  ident_bf = power_bf_sm$`bf_ident > 10`
+)
+kable(tab_sm)
+```
+
+## Figures
+
+```{r fig.height=3, fig.width=6}
+dat_bf_s <- pivot_longer(power_bf_s, c(-reps, -n), names_to = "manipulation", values_to = "effect")
+dat_bf_s$effectsize <- "small"
+dat_bf_sm <- pivot_longer(power_bf_sm, c(-reps, -n), names_to = "manipulation", values_to = "effect")
+dat_bf_sm$effectsize <- "small-to-medium"
+dat_bf <- rbind(dat_bf_s, dat_bf_sm)
+dat_bf$analysis <- "Bayes Factor > 10"
+dat_bf$manipulation <- recode(dat_bf$manipulation, `bf_pers > 10` = "persistence", `bf_ident > 10` = "identification")
+
+dat_fr_s$effectsize <- "small"
+dat_fr_sm$effectsize <- "small-to-medium"
+dat_fr <- rbind(dat_fr_s, dat_fr_sm)
+dat_fr$analysis <- "Frequentist"
+
+dat <- rbind(dat_fr, dat_bf) %>% 
+  rename(Manipulation = manipulation,
+         `Effect size` = effectsize,
+         Effect = effect,
+         Replications = reps) %>% 
+  mutate(
+    analysis = factor(analysis, levels = c("Frequentist", "Bayes Factor > 10")),
+    `Effect size` = factor(`Effect size`, levels = c("small-to-medium", "small")))
+
+power_fig <- ggplot(dat, aes(Replications, Effect, color = `Effect size`, shape = Manipulation)) +
+  scale_color_manual(values=c("black", "grey60")) +
+  geom_vline(xintercept = 4, linetype = "dashed", color = "grey") + 
+  geom_point(alpha = .9) +
+  scale_x_discrete(limits = c(1:n_reps)) +
+  facet_wrap(vars(analysis))
+power_fig
+ggsave("figures/fig_power.png", width = 8, height = 4)
+```
+
