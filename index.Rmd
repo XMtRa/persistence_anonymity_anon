@@ -7,6 +7,6 @@ On this website, you can find the companion material for the paper _The effects 
 
 You can currently find the following information here:
 
-- [Power analyses](power_analyses.html)
+- [Power analyses](power_analysis.html)
 
 This website is produced directly from the project's [github repository](https://github.com/XMtRa/persistence_anonymity_anon). You can download the material and the data, file an issue, or submit a pull request.
