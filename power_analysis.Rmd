@@ -35,11 +35,11 @@ The study design is as follows:
 
  - The website is experimentally manipulated (2 x 2 design). 
     - First, the _persistence_ of the comments is manipulated (permanent vs. ephemeral);
-    - Second, the _identification_ of the users is manipulated (identifiable vs. anonymous);
+    - Second, the _anonymity_ of the users is manipulated (identifiable vs. anonymous);
  - To increase generalizability, the groups will discuss one of three _topics_: corona politics, environment, gender.
  - All is between-person
 
-So these are 2 (identification) x 2 (persistence) experimental factors and a 3-way generalization factor (topic), resulting in a minimum of 12 groups.
+So these are 2 (anonymity) x 2 (persistence) experimental factors and a 3-way generalization factor (topic), resulting in a minimum of 12 groups.
 Hence, the minimum sample size 12 x 20 = 240 participants.
 
 To calculate power, the question now is how often do we need to _repeat_ this design to achieve sufficient power? Once, twice, thrice, etc? Hence, the factor to change/affect power is _repetition_, ranging from 1 to 5. Note that financing would only allow 4 repetitions, so the fifth is out of curiosity.
@@ -50,7 +50,7 @@ To calculate power, the question now is how often do we need to _repeat_ this de
 ```{r functions}
 generate_design <- function(groupsize, 
                             persis, 
-                            ident, 
+                            anon, 
                             topics, 
                             repetition, 
                             ...){
@@ -58,13 +58,13 @@ generate_design <- function(groupsize,
   # function generates underlying (empty) datastructure
   
   # count number of groups
-  groups <- persis * ident * topics * repetition
+  groups <- persis * anon * topics * repetition
   
   # make datastructure
   expand.grid(
     participant = 1:groupsize, 
     persistence = 1:persis - 1, # -1 to make binary
-    identification = 1:ident - 1, 
+    anonymity = 1:anon - 1, 
     topic = 1:topics,
     repetition = 1:repetition) %>% 
     as.data.frame() %>% 
@@ -95,14 +95,14 @@ sim_d <- function(d_frame,
   # For now, this will be standardized, bc. of lack of concrete data
   d_frame$words <- NA # create variable that'll be filled next
   for(i in 1 : repetition_n) {
-    d_frame[d_frame$persistence == 0 & d_frame$identification == 0 & d_frame$repetition == i, ]$words <- 
-      rnorm(groupsize_n, effects["pers0_iden_0_m"], sd)
-    d_frame[d_frame$persistence == 0 & d_frame$identification == 1 & d_frame$repetition == i, ]$words <- 
-      rnorm(groupsize_n, effects["pers0_iden_1_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$identification == 0 & d_frame$repetition == i, ]$words <- 
-      rnorm(groupsize_n, effects["pers1_iden_0_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$identification == 1 & d_frame$repetition == i, ]$words <- 
-      rnorm(groupsize_n, effects["pers1_iden_1_m"], sd)
+    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers0_anon_0_m"], sd)
+    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers0_anon_1_m"], sd)
+    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers1_anon_0_m"], sd)
+    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$words <- 
+      rnorm(groupsize_n, effects["pers1_anon_1_m"], sd)
   }
     
   return(d_frame)
@@ -117,23 +117,23 @@ analyze_d <- function(object, approach, ...) {
   # function to analyze data and to extract results
   
   # get means
-  means <- group_by(object, persistence, identification) %>% 
+  means <- group_by(object, persistence, anonymity) %>% 
     summarize(mean = mean(words), .groups = 'drop')
   
   results <- data.frame(
     reps = repetition_n,
     n = nrow(object), 
-    per0_ide0_m = filter(means, persistence == 0, identification == 0)$mean,
-    per0_ide1_m = filter(means, persistence == 0, identification == 1)$mean,
-    per1_ide0_m = filter(means, persistence == 1, identification == 0)$mean,
-    per1_ide1_m = filter(means, persistence == 1, identification == 1)$mean
+    per0_anon0_m = filter(means, persistence == 0, anonymity == 0)$mean,
+    per0_anon1_m = filter(means, persistence == 0, anonymity == 1)$mean,
+    per1_anon0_m = filter(means, persistence == 1, anonymity == 0)$mean,
+    per1_anon1_m = filter(means, persistence == 1, anonymity == 1)$mean
   )
 
   
   if(approach == "frequentist"){
     
     # get estimates from regression
-    fit <- lm(words ~ persistence + identification, object)
+    fit <- lm(words ~ persistence + anonymity, object)
     fit_rslt <- tidy(fit)
   
     # combine result
@@ -141,25 +141,25 @@ analyze_d <- function(object, approach, ...) {
       results,
       persistence_est = fit_rslt[fit_rslt$term == "persistence",]$estimate,
       persistence_p = fit_rslt[fit_rslt$term == "persistence",]$p.value,
-      identification_est = fit_rslt[fit_rslt$term == "identification",]$estimate,
-      identification_p = fit_rslt[fit_rslt$term == "identification",]$p.value
+      anonymity_est = fit_rslt[fit_rslt$term == "anonymity",]$estimate,
+      anonymity_p = fit_rslt[fit_rslt$term == "anonymity",]$p.value
     )
   } 
   
   if(approach == "bayes_factor") {
     
     # compute bayes factor
-    bf <- BayesFactor::regressionBF(words ~ persistence + identification, object, progress = F)
+    bf <- BayesFactor::regressionBF(words ~ persistence + anonymity, object, progress = F)
     
     # extract bayes factor
     bf_pers <- extractBF(bf)["persistence", ]$bf
-    bf_ident <- extractBF(bf)["identification", ]$bf
+    BF_anon <- extractBF(bf)["anonymity", ]$bf
     
     # combine results
     results <- cbind(
       results,
       bf_pers = bf_pers,
-      bf_ident = bf_ident
+      BF_anon = BF_anon
     )
   }
   return(results)
@@ -191,7 +191,7 @@ est_pow <- function(sims_n, approach, ...){
                  des_sim_fit, 
                  groupsize = groupsize_n, 
                  persis = persis_n, 
-                 ident = ident_n, 
+                 anon = anon_n, 
                  topics = topics_n, 
                  repetition = repetition_n, 
                  effects = effects_est, 
@@ -209,18 +209,18 @@ est_pow <- function(sims_n, approach, ...){
 # study design
 groupsize_n   <- 20
 persis_n      <- 2
-ident_n       <- 2 
+anon_n       <- 2 
 topics_n      <- 3
 
 # minimum sample size
-sample_size <- groupsize_n * persis_n * ident_n * topics_n
+sample_size <- groupsize_n * persis_n * anon_n * topics_n
 ```
 
 We define our study design as follows:
 
 - `r groupsize_n` participants per group
 - `r persis_n` persistence conditions
-- `r ident_n` identification conditions
+- `r anon_n` anonymity conditions
 - `r topics_n` different topics to be discussed
 - `r sample_size` minimum sample size
 
@@ -234,15 +234,15 @@ We can hence think of effects in terms of Cohen's d: .2 = small, .5 = medium, an
 | identifiable |    -.40    |   -.20    |
 | anonymous    |    -.20    |     0     |
 
-This should lead to a main effect of persistence of d = -.20 and a main effect of identifiability of d = -.20.
+This should lead to a main effect of persistence of d = -.20 and a main effect of anonymity of d = +.20.
 
 ```{r}
-pers0_iden_0_m <- 0
-pers0_iden_1_m <- -.2
-pers1_iden_0_m <- -.2
-pers1_iden_1_m <- -.4
-effects_est <- c(pers0_iden_0_m, pers0_iden_1_m, pers1_iden_0_m, pers1_iden_1_m)
-names(effects_est) <- c("pers0_iden_0_m", "pers0_iden_1_m", "pers1_iden_0_m", "pers1_iden_1_m")
+pers0_anon_0_m <- -0.2
+pers0_anon_1_m <-  0.0
+pers1_anon_0_m <- -0.4
+pers1_anon_1_m <- -0.2
+effects_est <- c(pers0_anon_0_m, pers0_anon_1_m, pers1_anon_0_m, pers1_anon_1_m)
+names(effects_est) <- c("pers0_anon_0_m", "pers0_anon_1_m", "pers1_anon_0_m", "pers1_anon_1_m")
 sd_est <- 1
 ```
 
@@ -264,7 +264,7 @@ We first create an empty data frame, in which we will then later simulate the da
 d_frame <- generate_design(
   groupsize  = groupsize_n,
   persis     = persis_n,  
-  ident      = ident_n,     
+  anon      = anon_n,     
   topics     = topics_n,  
   repetition = repetition_n
   )
@@ -274,7 +274,7 @@ d_frame
 Check if data-frame is alright.
 
 ```{r results='markup'}
-xtabs(~persistence + identification + topic + repetition, d_frame)
+xtabs(~persistence + anonymity + topic + repetition, d_frame)
 ```
 
 Allocation of participants to experimental groups worked just fine.
@@ -285,6 +285,7 @@ Let's create a single data-set and analyze it.
 
 ```{r}
 d <- sim_d(d_frame, seed = 1, effects_est, sd_est, groupsize_n)
+write.csv(d, "data_simulated.csv")
 ```
 
 ## Analyse data
@@ -293,7 +294,7 @@ Let's check if means were created alright:
 
 ```{r}
 d %>% 
-  group_by(persistence, identification) %>% 
+  group_by(persistence, anonymity) %>% 
   summarize(mean = mean(words), .groups = 'drop') %>% 
   kable()
 ```
@@ -303,11 +304,11 @@ Sample size small and single study, but general tendency seems to be alright.
 Let's also quickly run a regression.
 
 ```{r}
-fit <- lm(words ~ persistence + identification, d)
+fit <- lm(words ~ persistence + anonymity, d)
 summary(fit)
 ```
 
-Results look reasonable. Both persistence and identification reduce disclosure.
+Results look reasonable. Both persistence and anonymity reduce disclosure.
 
 # Power analysis
 ## Set-Up
@@ -330,9 +331,9 @@ We run a power analysis with `r n_sim` simulations per design. We test `r n_reps
 
 ```{r}
 # create empy data frame
-columns <- c("sim", "reps", "per0_ide0_m", "per0_ide1_m", 
-             "per1_ide0_m", "per1_ide1_m", "persistence_est", 
-             "persistence_p", "identification_est", "identification_p", "n")
+columns <- c("sim", "reps", "per0_anon0_m", "per0_anon1_m", 
+             "per1_anon0_m", "per1_anon1_m", "persistence_est", 
+             "persistence_p", "anonymity_est", "anonymity_p", "n")
 sims_freq_s <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
 colnames(sims_freq_s) = columns
 
@@ -360,11 +361,11 @@ ggplot(sims_freq_s) +
 
 Shows that with more repetitions, effect size move closer to actual population value.
 
-To make sure, let's next check identification -- should provide identical results.
+To make sure, let's next check anonymity -- should provide identical results.
 
 ```{r}
 ggplot(sims_freq_s) +
-  geom_point(aes(sim, identification_est, color = identification_p < .05), 
+  geom_point(aes(sim, anonymity_est, color = anonymity_p < .05), 
              size = .2, alpha = .5) + 
   scale_color_manual(values = c("darkgrey", "blue")) +
   facet_wrap(facets = "reps", nrow = 1) +
@@ -381,12 +382,12 @@ This is more of a sanity check to see if our population values can be reproduced
 ```{r}
 sims_freq_s %>% 
   group_by(reps) %>% 
-  summarise(per0_ide0 = mean(per0_ide0_m),
-            per0_ide1 = mean(per0_ide1_m),
-            per1_ide0 = mean(per1_ide0_m),
-            per1_ide1 = mean(per1_ide1_m),
+  summarise(per0_anon0 = mean(per0_anon0_m),
+            per0_anon1 = mean(per0_anon1_m),
+            per1_anon0 = mean(per1_anon0_m),
+            per1_anon1 = mean(per1_anon1_m),
             persistence = mean(persistence_est), 
-            identification = mean(identification_est)
+            anonymity = mean(anonymity_est)
             ) %>% 
   as.data.frame() %>% 
   kable()
@@ -403,7 +404,7 @@ power_freq_s <- sims_freq_s %>%
   group_by(reps) %>% 
   summarise(n = max(n),
             persistence = sum(persistence_p < .05 & persistence_est < 0) / n_sim,
-            identification = sum(identification_p < .05 & identification_est < 0) / n_sim)
+            anonymity = sum(anonymity_p < .05 & anonymity_est > 0) / n_sim)
 kable(power_freq_s)
 ```
 
@@ -427,7 +428,7 @@ Next, we analyze the data using Bayes factors.
 We first do a test run.
 
 ```{r}
-bf <- BayesFactor::regressionBF(words ~ persistence + identification, d)
+bf <- BayesFactor::regressionBF(words ~ persistence + anonymity, d)
 summary(bf)
 ```
 
@@ -437,8 +438,8 @@ We then run the power analyses.
 
 ```{r}
 # create empy data frame
-columns <- c("sim", "reps", "n", "per0_ide0_m", "per0_ide1_m", 
-             "per1_ide0_m", "per1_ide1_m", "BF_pers", "BF_ident")
+columns <- c("sim", "reps", "n", "per0_anon0_m", "per0_anon1_m", 
+             "per1_anon0_m", "per1_anon1_m", "BF_pers", "BF_anon")
 sims_bf_s <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
 colnames(sims_bf_s) = columns
 
@@ -458,7 +459,7 @@ We report how often the _Bayes Factor was above 10_, hence very noteworthy.
 ```{r}
 power_bf_s <- sims_bf_s %>% 
   group_by(reps) %>% 
-  summarise(`bf_ident > 10` = sum(bf_ident > 10) / n_sim,
+  summarise(`BF_anon > 10` = sum(BF_anon > 10) / n_sim,
             `bf_pers > 10` = sum(bf_pers > 10) / n_sim,
             n = max(n))
 kable(power_bf_s)
@@ -469,12 +470,12 @@ kable(power_bf_s)
 Let's next rerun our power analysis, using slightly larger effect sized (small to medium).
 
 ```{r}
-pers0_iden_0_m <- 0
-pers0_iden_1_m <- -.35
-pers1_iden_0_m <- -.35
-pers1_iden_1_m <- -.7
-effects_est <- c(pers0_iden_0_m, pers0_iden_1_m, pers1_iden_0_m, pers1_iden_1_m)
-names(effects_est) <- c("pers0_iden_0_m", "pers0_iden_1_m", "pers1_iden_0_m", "pers1_iden_1_m")
+pers0_anon_0_m <- -0.35
+pers0_anon_1_m <-  0.00
+pers1_anon_0_m <- -0.70
+pers1_anon_1_m <- -0.35
+effects_est <- c(pers0_anon_0_m, pers0_anon_1_m, pers1_anon_0_m, pers1_anon_1_m)
+names(effects_est) <- c("pers0_anon_0_m", "pers0_anon_1_m", "pers1_anon_0_m", "pers1_anon_1_m")
 sd_est <- 1
 ```
 
@@ -485,9 +486,9 @@ Everything as above, but now assuming larger effects.
 
 ```{r results='hide'}
 # create empy data frame
-columns <- c("sim", "reps", "per0_ide0_m", "per0_ide1_m", 
-             "per1_ide0_m", "per1_ide1_m", "persistence_est", 
-             "persistence_p", "identification_est", "identification_p", "n")
+columns <- c("sim", "reps", "per0_anon0_m", "per0_anon1_m", 
+             "per1_anon0_m", "per1_anon1_m", "persistence_est", 
+             "persistence_p", "anonymity_est", "anonymity_p", "n")
 sims_freq_sm <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
 colnames(sims_freq_sm) = columns
 
@@ -515,11 +516,11 @@ ggplot(sims_freq_sm) +
 
 Shows that with more repetitions, effect size moves closer to actual population value.
 
-To make sure, let's next check identification -- should provide identical results.
+To make sure, let's next check anonymity -- should provide identical results.
 
 ```{r}
 ggplot(sims_freq_sm) +
-  geom_point(aes(sim, identification_est, color = identification_p < .05), 
+  geom_point(aes(sim, anonymity_est, color = anonymity_p < .05), 
              size = .2, alpha = .5) + 
   scale_color_manual(values = c("darkgrey", "blue")) +
   facet_wrap(facets = "reps", nrow = 1) +
@@ -536,12 +537,12 @@ This is more of a sanity check to see if our population values can be reproduced
 ```{r}
 sims_freq_sm %>% 
   group_by(reps) %>% 
-  summarise(per0_ide0 = mean(per0_ide0_m),
-            per0_ide1 = mean(per0_ide1_m),
-            per1_ide0 = mean(per1_ide0_m),
-            per1_ide1 = mean(per1_ide1_m),
+  summarise(per0_anon0 = mean(per0_anon0_m),
+            per0_anon1 = mean(per0_anon1_m),
+            per1_anon0 = mean(per1_anon0_m),
+            per1_anon1 = mean(per1_anon1_m),
             persistence = mean(persistence_est), 
-            identification = mean(identification_est)
+            anonymity = mean(anonymity_est)
             ) %>% 
   kable()
 ```
@@ -556,7 +557,7 @@ Now, let's compute power for each number of replication.
 power_freq_sm <- sims_freq_sm %>% 
   group_by(reps) %>% 
   summarise(persistence = sum(persistence_p < .05 & persistence_est < 0) / n_sim,
-            identification = sum(identification_p < .05 & identification_est < 0) / n_sim,
+            anonymity = sum(anonymity_p < .05 & anonymity_est > 0) / n_sim,
             n = max(n))
 kable(power_freq_sm)
 ```
@@ -576,8 +577,8 @@ power_fig
 
 ```{r}
 # create empy data frame
-columns <- c("sim", "reps", "n", "per0_ide0_m", "per0_ide1_m", 
-             "per1_ide0_m", "per1_ide1_m", "BF_pers", "BF_ident")
+columns <- c("sim", "reps", "n", "per0_anon0_m", "per0_anon1_m", 
+             "per1_anon0_m", "per1_anon1_m", "BF_pers", "BF_anon")
 sims_bf_sm <- data.frame(matrix(nrow = 0, ncol = length(columns))) 
 colnames(sims_bf_sm) = columns
 
@@ -597,13 +598,13 @@ We next report how often the Bayes Factor was above 10, hence very noteworthy.
 ```{r}
 power_bf_sm <- sims_bf_sm %>% 
   group_by(reps) %>% 
-  summarise(`bf_ident > 10` = sum(bf_ident > 10) / n_sim,
+  summarise(`BF_anon > 10` = sum(BF_anon > 10) / n_sim,
             `bf_pers > 10` = sum(bf_pers > 10) / n_sim,
             n = max(n))
 kable(power_bf_sm)
 ```
 
-With four repetitions, the Bayes Factor is `r power_bf_sm %>% filter(reps == 4) %>% select("bf_ident > 10") * 100 %>% round(0)`, hence power is high.
+With four repetitions, the Bayes Factor is `r power_bf_sm %>% filter(reps == 4) %>% select("BF_anon > 10") * 100 %>% round(0)`, hence power is high.
 
 # Summary
 ## Tables
@@ -615,9 +616,9 @@ tab_s <- cbind(
   Replications = power_freq_s$reps,
   N = power_freq_s$n,
   pers_power = power_freq_s$persistence,
-  ident_power = power_freq_s$identification,
+  anon_power = power_freq_s$anonymity,
   pers_bf = power_bf_s$`bf_pers > 10`,
-  ident_bf = power_bf_s$`bf_ident > 10`
+  anon_bf = power_bf_s$`BF_anon > 10`
 )
 kable(tab_s)
 ```
@@ -629,9 +630,9 @@ tab_sm <- cbind(
   Replications = power_freq_sm$reps,
   N = power_freq_sm$n,
   pers_power = power_freq_sm$persistence, 
-  ident_power = power_freq_sm$identification,
+  anon_power = power_freq_sm$anonymity,
   pers_bf = power_bf_sm$`bf_pers > 10`,
-  ident_bf = power_bf_sm$`bf_ident > 10`
+  anon_bf = power_bf_sm$`BF_anon > 10`
 )
 kable(tab_sm)
 ```
@@ -645,7 +646,7 @@ dat_bf_sm <- pivot_longer(power_bf_sm, c(-reps, -n), names_to = "manipulation", 
 dat_bf_sm$effectsize <- "small-to-medium"
 dat_bf <- rbind(dat_bf_s, dat_bf_sm)
 dat_bf$analysis <- "Bayes Factor > 10"
-dat_bf$manipulation <- recode(dat_bf$manipulation, `bf_pers > 10` = "persistence", `bf_ident > 10` = "identification")
+dat_bf$manipulation <- recode(dat_bf$manipulation, `bf_pers > 10` = "persistence", `BF_anon > 10` = "anonymity")
 
 dat_fr_s$effectsize <- "small"
 dat_fr_sm$effectsize <- "small-to-medium"

@@ -1,0 +1,48 @@
+---
+title: "Analyses preregistered"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = T, warning = F)
+set.seed(1)
+options(scipen = 10000, digits = 2)
+```
+
+```{r packages, message=F, results='hide', cache = F}
+library(BayesFactor)
+library(brms)
+library(ggplot2)
+library(knitr)
+library(lme4)
+library(magrittr)
+library(tidyverse)
+```
+
+# Load data
+
+```{r}
+d <- read.csv("data_simulated.csv")
+```
+
+# Data wrangling
+
+```{r}
+d <- d %>% 
+  mutate(persistence = persistence - .5,
+         anonymity = anonymity - .5)
+```
+
+# Analyze data
+
+```{r}
+fit <- lmer(words ~ 1 + persistence * anonymity + 
+              (1 + persistence * anonymity | topic) + 
+              (1 + persistence * anonymity | group), d)
+summary(fit)
+```
+
