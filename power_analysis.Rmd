@@ -25,10 +25,10 @@ library(tidyverse)
 
 # Background
 
-Here, we run some power analysis for a study on online political participation. 
+Using data simulation, we run a power analysis for a study on how design characteristics of online platforms affect online political participation.
 In the study, people use a social networking site (discord) on which they discuss political matters. 
 Participants will communicate in groups of 20 people each. This number is fixed for theory-related reasons, that is medium scale group communication.
-The dependent variable is how much people discuss (measured via _number of words_).
+The dependent variable is how much people discuss (measured via _number of opinion expressions_).
 We're interested how different SNS designs affect communication.
 
 The study design is as follows:
@@ -43,6 +43,13 @@ So these are 2 (anonymity) x 2 (persistence) experimental factors and a 3-way ge
 Hence, the minimum sample size 12 x 20 = 240 participants.
 
 To calculate power, the question now is how often do we need to _repeat_ this design to achieve sufficient power? Once, twice, thrice, etc? Hence, the factor to change/affect power is _repetition_, ranging from 1 to 5. Note that financing would only allow 4 repetitions, so the fifth is out of curiosity.
+
+Also note that we are here simulating data which we then analyze. The data simulation is somewhat rudimentary. 
+
+- First, In reality, the data are nested: in groups (some groups are more active than others) and topics (some topics elicit more comments than others). Because we are lacking information on the covariance structure, we did not implement the data's nested structure. In conclusion, we also did not analyze the data using mixed effects models, which account for hierachical structure. 
+- Second, opposed to what we model here, our outcome variable is likely not normally distributed. As a result, if this turns out to be the case we will also analyze the data using Bayesian models that can model the outcome variable with for example a poisson or gamma distribution, also taking into account zero-inflation. 
+
+In conclusion, in our paper we will analyze the data using (Bayesian) mixed effects modeling using lme4 and/or brms.
 
 # Custom functions
 ## Generate design
@@ -93,15 +100,15 @@ sim_d <- function(d_frame,
   
   # create the DV. 
   # For now, this will be standardized, bc. of lack of concrete data
-  d_frame$words <- NA # create variable that'll be filled next
+  d_frame$expressions <- NA # create variable that'll be filled next
   for(i in 1 : repetition_n) {
-    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$words <- 
+    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$expressions <- 
       rnorm(groupsize_n, effects["pers0_anon_0_m"], sd)
-    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$words <- 
+    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$expressions <- 
       rnorm(groupsize_n, effects["pers0_anon_1_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$words <- 
+    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$expressions <- 
       rnorm(groupsize_n, effects["pers1_anon_0_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$words <- 
+    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$expressions <- 
       rnorm(groupsize_n, effects["pers1_anon_1_m"], sd)
   }
     
@@ -118,7 +125,7 @@ analyze_d <- function(object, approach, ...) {
   
   # get means
   means <- group_by(object, persistence, anonymity) %>% 
-    summarize(mean = mean(words), .groups = 'drop')
+    summarize(mean = mean(expressions), .groups = 'drop')
   
   results <- data.frame(
     reps = repetition_n,
@@ -133,7 +140,7 @@ analyze_d <- function(object, approach, ...) {
   if(approach == "frequentist"){
     
     # get estimates from regression
-    fit <- lm(words ~ persistence + anonymity, object)
+    fit <- lm(expressions ~ persistence + anonymity, object)
     fit_rslt <- tidy(fit)
   
     # combine result
@@ -149,7 +156,7 @@ analyze_d <- function(object, approach, ...) {
   if(approach == "bayes_factor") {
     
     # compute bayes factor
-    bf <- BayesFactor::regressionBF(words ~ persistence + anonymity, object, progress = F)
+    bf <- BayesFactor::regressionBF(expressions ~ persistence + anonymity, object, progress = F)
     
     # extract bayes factor
     bf_pers <- extractBF(bf)["persistence", ]$bf
@@ -248,10 +255,10 @@ sd_est <- 1
 
 # Test run
 
-To see if our functions work, let's make a test run with only one repetition.
+To see if our functions work, let's make a test run with four repetitions.
 
 ```{r}
-repetition_n <- 1
+repetition_n <- 4
 ```
 
 
@@ -285,7 +292,7 @@ Let's create a single data-set and analyze it.
 
 ```{r}
 d <- sim_d(d_frame, seed = 1, effects_est, sd_est, groupsize_n)
-write.csv(d, "data_simulated.csv")
+write.csv(d, "data_simulated.csv") # save data.
 ```
 
 ## Analyse data
@@ -295,7 +302,7 @@ Let's check if means were created alright:
 ```{r}
 d %>% 
   group_by(persistence, anonymity) %>% 
-  summarize(mean = mean(words), .groups = 'drop') %>% 
+  summarize(mean = mean(expressions), .groups = 'drop') %>% 
   kable()
 ```
 
@@ -304,7 +311,7 @@ Sample size small and single study, but general tendency seems to be alright.
 Let's also quickly run a regression.
 
 ```{r}
-fit <- lm(words ~ persistence + anonymity, d)
+fit <- lm(expressions ~ persistence + anonymity, d)
 summary(fit)
 ```
 
@@ -428,7 +435,7 @@ Next, we analyze the data using Bayes factors.
 We first do a test run.
 
 ```{r}
-bf <- BayesFactor::regressionBF(words ~ persistence + anonymity, d)
+bf <- BayesFactor::regressionBF(expressions ~ persistence + anonymity, d)
 summary(bf)
 ```
 

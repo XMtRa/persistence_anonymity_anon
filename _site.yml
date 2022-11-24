@@ -6,6 +6,8 @@ navbar:
   left:
     - text: "Power Analysis"
       href: power_analysis.html
+    - text: "Planned Analysis"
+      href: analysis_preregistered.html
   right:
     - text: "Source Code"
       icon: fa-lg fa-github

@@ -323,6 +323,9 @@ div.tocify {
         <li>
   <a href="power_analysis.html">Power Analysis</a>
 </li>
+<li>
+  <a href="analysis_preregistered.html">Planned Analysis</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -355,14 +358,15 @@ library(magrittr)
 library(tidyverse)</code></pre>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>Here, we run some power analysis for a study on online political
+<p>Using data simulation, we run a power analysis for a study on how
+design characteristics of online platforms affect online political
 participation. In the study, people use a social networking site
 (discord) on which they discuss political matters. Participants will
 communicate in groups of 20 people each. This number is fixed for
 theory-related reasons, that is medium scale group communication. The
 dependent variable is how much people discuss (measured via <em>number
-of words</em>). We’re interested how different SNS designs affect
-communication.</p>
+of opinion expressions</em>). We’re interested how different SNS designs
+affect communication.</p>
 <p>The study design is as follows:</p>
 <ul>
 <li>The website is experimentally manipulated (2 x 2 design).
@@ -384,6 +388,23 @@ groups. Hence, the minimum sample size 12 x 20 = 240 participants.</p>
 thrice, etc? Hence, the factor to change/affect power is
 <em>repetition</em>, ranging from 1 to 5. Note that financing would only
 allow 4 repetitions, so the fifth is out of curiosity.</p>
+<p>Also note that we are here simulating data which we then analyze. The
+data simulation is somewhat rudimentary.</p>
+<ul>
+<li>First, In reality, the data are nested: in groups (some groups are
+more active than others) and topics (some topics elicit more comments
+than others). Because we are lacking information on the covariance
+structure, we did not implement the data’s nested structure. In
+conclusion, we also did not analyze the data using mixed effects models,
+which account for hierachical structure.</li>
+<li>Second, opposed to what we model here, our outcome variable is
+likely not normally distributed. As a result, if this turns out to be
+the case we will also analyze the data using Bayesian models that can
+model the outcome variable with for example a poisson or gamma
+distribution, also taking into account zero-inflation.</li>
+</ul>
+<p>In conclusion, in our paper we will analyze the data using (Bayesian)
+mixed effects modeling using lme4 and/or brms.</p>
 </div>
 <div id="custom-functions" class="section level1">
 <h1>Custom functions</h1>
@@ -432,15 +453,15 @@ allow 4 repetitions, so the fifth is out of curiosity.</p>
   
   # create the DV. 
   # For now, this will be standardized, bc. of lack of concrete data
-  d_frame$words &lt;- NA # create variable that&#39;ll be filled next
+  d_frame$expressions &lt;- NA # create variable that&#39;ll be filled next
   for(i in 1 : repetition_n) {
-    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$words &lt;- 
+    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$expressions &lt;- 
       rnorm(groupsize_n, effects[&quot;pers0_anon_0_m&quot;], sd)
-    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$words &lt;- 
+    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$expressions &lt;- 
       rnorm(groupsize_n, effects[&quot;pers0_anon_1_m&quot;], sd)
-    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$words &lt;- 
+    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$expressions &lt;- 
       rnorm(groupsize_n, effects[&quot;pers1_anon_0_m&quot;], sd)
-    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$words &lt;- 
+    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$expressions &lt;- 
       rnorm(groupsize_n, effects[&quot;pers1_anon_1_m&quot;], sd)
   }
     
@@ -455,7 +476,7 @@ allow 4 repetitions, so the fifth is out of curiosity.</p>
   
   # get means
   means &lt;- group_by(object, persistence, anonymity) %&gt;% 
-    summarize(mean = mean(words), .groups = &#39;drop&#39;)
+    summarize(mean = mean(expressions), .groups = &#39;drop&#39;)
   
   results &lt;- data.frame(
     reps = repetition_n,
@@ -470,7 +491,7 @@ allow 4 repetitions, so the fifth is out of curiosity.</p>
   if(approach == &quot;frequentist&quot;){
     
     # get estimates from regression
-    fit &lt;- lm(words ~ persistence + anonymity, object)
+    fit &lt;- lm(expressions ~ persistence + anonymity, object)
     fit_rslt &lt;- tidy(fit)
   
     # combine result
@@ -486,7 +507,7 @@ allow 4 repetitions, so the fifth is out of curiosity.</p>
   if(approach == &quot;bayes_factor&quot;) {
     
     # compute bayes factor
-    bf &lt;- BayesFactor::regressionBF(words ~ persistence + anonymity, object, progress = F)
+    bf &lt;- BayesFactor::regressionBF(expressions ~ persistence + anonymity, object, progress = F)
     
     # extract bayes factor
     bf_pers &lt;- extractBF(bf)[&quot;persistence&quot;, ]$bf
@@ -595,9 +616,9 @@ sd_est &lt;- 1</code></pre>
 </div>
 <div id="test-run" class="section level1">
 <h1>Test run</h1>
-<p>To see if our functions work, let’s make a test run with only one
-repetition.</p>
-<pre class="r"><code>repetition_n &lt;- 1</code></pre>
+<p>To see if our functions work, let’s make a test run with four
+repetitions.</p>
+<pre class="r"><code>repetition_n &lt;- 4</code></pre>
 <div id="set-up" class="section level2">
 <h2>Set-up</h2>
 <p>We first create an empty data frame, in which we will then later
@@ -632,6 +653,69 @@ d_frame</code></pre>
 ##            anonymity
 ## persistence  0  1
 ##           0 20 20
+##           1 20 20
+## 
+## , , topic = 1, repetition = 2
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 2, repetition = 2
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 3, repetition = 2
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 1, repetition = 3
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 2, repetition = 3
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 3, repetition = 3
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 1, repetition = 4
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 2, repetition = 4
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
+##           1 20 20
+## 
+## , , topic = 3, repetition = 4
+## 
+##            anonymity
+## persistence  0  1
+##           0 20 20
 ##           1 20 20</code></pre>
 <p>Allocation of participants to experimental groups worked just
 fine.</p>
@@ -640,14 +724,14 @@ fine.</p>
 <h2>Simulate data</h2>
 <p>Let’s create a single data-set and analyze it.</p>
 <pre class="r"><code>d &lt;- sim_d(d_frame, seed = 1, effects_est, sd_est, groupsize_n)
-write.csv(d, &quot;data_simulated.csv&quot;)</code></pre>
+write.csv(d, &quot;data_simulated.csv&quot;) # save data.</code></pre>
 </div>
 <div id="analyse-data" class="section level2">
 <h2>Analyse data</h2>
 <p>Let’s check if means were created alright:</p>
 <pre class="r"><code>d %&gt;% 
   group_by(persistence, anonymity) %&gt;% 
-  summarize(mean = mean(words), .groups = &#39;drop&#39;) %&gt;% 
+  summarize(mean = mean(expressions), .groups = &#39;drop&#39;) %&gt;% 
   kable()</code></pre>
 <table>
 <thead>
@@ -661,47 +745,49 @@ write.csv(d, &quot;data_simulated.csv&quot;)</code></pre>
 <tr class="odd">
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">-0.01</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">-0.01</td>
+<td align="right">0.00</td>
 </tr>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">-0.26</td>
+<td align="right">-0.32</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">-0.10</td>
+<td align="right">-0.31</td>
 </tr>
 </tbody>
 </table>
 <p>Sample size small and single study, but general tendency seems to be
 alright.</p>
 <p>Let’s also quickly run a regression.</p>
-<pre class="r"><code>fit &lt;- lm(words ~ persistence + anonymity, d)
+<pre class="r"><code>fit &lt;- lm(expressions ~ persistence + anonymity, d)
 summary(fit)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = words ~ persistence + anonymity, data = d)
+## lm(formula = expressions ~ persistence + anonymity, data = d)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -2.3652 -0.5202  0.0228  0.5583  2.3399 
+## -2.7753 -0.6269 -0.0415  0.6137  2.6430 
 ## 
 ## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)  -0.0495     0.1005   -0.49     0.62
-## persistence  -0.1718     0.1160   -1.48     0.14
-## anonymity     0.0830     0.1160    0.72     0.48
+##             Estimate Std. Error t value   Pr(&gt;|t|)    
+## (Intercept)  0.00287    0.05336    0.05       0.96    
+## persistence -0.31971    0.06161   -5.19 0.00000026 ***
+## anonymity    0.00326    0.06161    0.05       0.96    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.9 on 237 degrees of freedom
-## Multiple R-squared:  0.0113, Adjusted R-squared:  0.00293 
-## F-statistic: 1.35 on 2 and 237 DF,  p-value: 0.261</code></pre>
+## Residual standard error: 0.95 on 957 degrees of freedom
+## Multiple R-squared:  0.0274, Adjusted R-squared:  0.0253 
+## F-statistic: 13.5 on 2 and 957 DF,  p-value: 0.00000171</code></pre>
 <p>Results look reasonable. Both persistence and anonymity reduce
 disclosure.</p>
 </div>
@@ -805,7 +891,7 @@ to see if our population values can be reproduced.</p>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">-0.2</td>
-<td align="right">-0.01</td>
+<td align="right">0.00</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
 <td align="right">-0.20</td>
@@ -880,7 +966,7 @@ kable(power_freq_s)</code></pre>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.54</td>
+<td align="right">0.55</td>
 <td align="right">0.56</td>
 </tr>
 <tr class="odd">
@@ -898,8 +984,8 @@ kable(power_freq_s)</code></pre>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">0.83</td>
-<td align="right">0.80</td>
+<td align="right">0.84</td>
+<td align="right">0.79</td>
 </tr>
 </tbody>
 </table>
@@ -919,13 +1005,13 @@ power.</p>
 <div id="test-run-1" class="section level4">
 <h4>Test run</h4>
 <p>We first do a test run.</p>
-<pre class="r"><code>bf &lt;- BayesFactor::regressionBF(words ~ persistence + anonymity, d)
+<pre class="r"><code>bf &lt;- BayesFactor::regressionBF(expressions ~ persistence + anonymity, d)
 summary(bf)</code></pre>
 <pre><code>## Bayes factor analysis
 ## --------------
-## [1] persistence             : 0.4  ±0%
-## [2] anonymity               : 0.18 ±0%
-## [3] persistence + anonymity : 0.11 ±0.01%
+## [1] persistence             : 35628 ±0.01%
+## [2] anonymity               : 0.072 ±0%
+## [3] persistence + anonymity : 3655  ±0.01%
 ## 
 ## Against denominator:
 ##   Intercept only 
@@ -972,14 +1058,14 @@ kable(power_bf_s)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.20</td>
+<td align="right">0.21</td>
 <td align="right">0.21</td>
 <td align="right">240</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.29</td>
-<td align="right">0.29</td>
+<td align="right">0.27</td>
+<td align="right">0.30</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
@@ -990,13 +1076,13 @@ kable(power_bf_s)</code></pre>
 </tr>
 <tr class="even">
 <td align="right">4</td>
-<td align="right">0.47</td>
+<td align="right">0.46</td>
 <td align="right">0.49</td>
 <td align="right">960</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">0.54</td>
+<td align="right">0.53</td>
 <td align="right">0.58</td>
 <td align="right">1200</td>
 </tr>
@@ -1173,8 +1259,8 @@ kable(power_freq_sm)</code></pre>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.88</td>
-<td align="right">0.89</td>
+<td align="right">0.87</td>
+<td align="right">0.87</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
@@ -1248,14 +1334,14 @@ kable(power_bf_sm)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.38</td>
+<td align="right">0.39</td>
 <td align="right">0.42</td>
 <td align="right">240</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.67</td>
-<td align="right">0.65</td>
+<td align="right">0.68</td>
+<td align="right">0.63</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
@@ -1267,18 +1353,18 @@ kable(power_bf_sm)</code></pre>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">0.89</td>
-<td align="right">0.89</td>
+<td align="right">0.90</td>
 <td align="right">960</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">0.95</td>
+<td align="right">0.96</td>
 <td align="right">0.95</td>
 <td align="right">1200</td>
 </tr>
 </tbody>
 </table>
-<p>With four repetitions, the Bayes Factor is 89.4, hence power is
+<p>With four repetitions, the Bayes Factor is 89.2, hence power is
 high.</p>
 </div>
 </div>
@@ -1316,15 +1402,15 @@ kable(tab_s)</code></pre>
 <td align="right">0.39</td>
 <td align="right">0.41</td>
 <td align="right">0.21</td>
-<td align="right">0.20</td>
+<td align="right">0.21</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.54</td>
+<td align="right">0.55</td>
 <td align="right">0.56</td>
-<td align="right">0.29</td>
-<td align="right">0.29</td>
+<td align="right">0.30</td>
+<td align="right">0.27</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
@@ -1340,15 +1426,15 @@ kable(tab_s)</code></pre>
 <td align="right">0.76</td>
 <td align="right">0.74</td>
 <td align="right">0.49</td>
-<td align="right">0.47</td>
+<td align="right">0.46</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">0.83</td>
-<td align="right">0.80</td>
+<td align="right">0.84</td>
+<td align="right">0.79</td>
 <td align="right">0.58</td>
-<td align="right">0.54</td>
+<td align="right">0.53</td>
 </tr>
 </tbody>
 </table>
@@ -1380,15 +1466,15 @@ kable(tab_sm)</code></pre>
 <td align="right">0.67</td>
 <td align="right">0.65</td>
 <td align="right">0.42</td>
-<td align="right">0.38</td>
+<td align="right">0.39</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.88</td>
-<td align="right">0.89</td>
-<td align="right">0.65</td>
-<td align="right">0.67</td>
+<td align="right">0.87</td>
+<td align="right">0.87</td>
+<td align="right">0.63</td>
+<td align="right">0.68</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
@@ -1403,7 +1489,7 @@ kable(tab_sm)</code></pre>
 <td align="right">960</td>
 <td align="right">0.98</td>
 <td align="right">0.98</td>
-<td align="right">0.89</td>
+<td align="right">0.90</td>
 <td align="right">0.89</td>
 </tr>
 <tr class="odd">
@@ -1412,7 +1498,7 @@ kable(tab_sm)</code></pre>
 <td align="right">0.99</td>
 <td align="right">0.99</td>
 <td align="right">0.95</td>
-<td align="right">0.95</td>
+<td align="right">0.96</td>
 </tr>
 </tbody>
 </table>
