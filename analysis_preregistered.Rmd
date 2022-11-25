@@ -51,13 +51,19 @@ summary(fit)
 
 ## Bayesian mixed effects modeling
 
-```{r}
+```{r message=F, warning=F, results="hide"}
 fit <- brm(words ~ 1 + persistence * anonymity + 
               (1 + persistence * anonymity | topic) + 
               (1 + persistence * anonymity | group), 
-           data = d
+           data = d,
+           silent = 2,
+           refresh = 0
            # , family = zero_inflated_poisson("log") will use later with integer data
            )
+```
+
+
+```{r}
 summary(fit)
 ```
 
