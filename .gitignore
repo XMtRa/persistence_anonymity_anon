@@ -5,4 +5,5 @@
 .DS_Store
 archive/
 power_analysis_cache/
+analysis_preregistered_cache/
 site_libs/.DS_Store
