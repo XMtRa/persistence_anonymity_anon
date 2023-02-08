@@ -101,17 +101,32 @@ sim_d <- function(d_frame,
   # create the DV. 
   # For now, this will be standardized, bc. of lack of concrete data
   d_frame$expressions <- NA # create variable that'll be filled next
-  for(i in 1 : repetition_n) {
-    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$expressions <- 
-      rnorm(groupsize_n, effects["pers0_anon_0_m"], sd)
-    d_frame[d_frame$persistence == 0 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$expressions <- 
-      rnorm(groupsize_n, effects["pers0_anon_1_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 0 & d_frame$repetition == i, ]$expressions <- 
-      rnorm(groupsize_n, effects["pers1_anon_0_m"], sd)
-    d_frame[d_frame$persistence == 1 & d_frame$anonymity == 1 & d_frame$repetition == i, ]$expressions <- 
-      rnorm(groupsize_n, effects["pers1_anon_1_m"], sd)
+  
+  # run loop creating DVs
+  for(i in 1 : repetition_n){
+    for(j in 1 : topics_n){
+      d_frame[d_frame$persistence == 0 & 
+              d_frame$anonymity == 0 & 
+              d_frame$repetition == i & 
+              d_frame$topic == j, ]$expressions <- 
+        rnorm(groupsize_n, effects["pers0_anon_0_m"], sd)
+      d_frame[d_frame$persistence == 1 & 
+              d_frame$anonymity == 0 & 
+              d_frame$repetition == i & 
+              d_frame$topic == j, ]$expressions <- 
+        rnorm(groupsize_n, effects["pers1_anon_0_m"], sd)
+      d_frame[d_frame$persistence == 0 & 
+              d_frame$anonymity == 1 & 
+              d_frame$repetition == i & 
+              d_frame$topic == j, ]$expressions <- 
+        rnorm(groupsize_n, effects["pers0_anon_1_m"], sd)
+      d_frame[d_frame$persistence == 1 & 
+              d_frame$anonymity == 1 & 
+              d_frame$repetition == i & 
+              d_frame$topic == j, ]$expressions <- 
+        rnorm(groupsize_n, effects["pers1_anon_1_m"], sd)
+    }
   }
-    
   return(d_frame)
 }
 ```

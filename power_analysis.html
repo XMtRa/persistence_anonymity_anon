@@ -454,17 +454,32 @@ mixed effects modeling using lme4 and/or brms.</p>
   # create the DV. 
   # For now, this will be standardized, bc. of lack of concrete data
   d_frame$expressions &lt;- NA # create variable that&#39;ll be filled next
-  for(i in 1 : repetition_n) {
-    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$expressions &lt;- 
-      rnorm(groupsize_n, effects[&quot;pers0_anon_0_m&quot;], sd)
-    d_frame[d_frame$persistence == 0 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$expressions &lt;- 
-      rnorm(groupsize_n, effects[&quot;pers0_anon_1_m&quot;], sd)
-    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 0 &amp; d_frame$repetition == i, ]$expressions &lt;- 
-      rnorm(groupsize_n, effects[&quot;pers1_anon_0_m&quot;], sd)
-    d_frame[d_frame$persistence == 1 &amp; d_frame$anonymity == 1 &amp; d_frame$repetition == i, ]$expressions &lt;- 
-      rnorm(groupsize_n, effects[&quot;pers1_anon_1_m&quot;], sd)
+  
+  # run loop creating DVs
+  for(i in 1 : repetition_n){
+    for(j in 1 : topics_n){
+      d_frame[d_frame$persistence == 0 &amp; 
+              d_frame$anonymity == 0 &amp; 
+              d_frame$repetition == i &amp; 
+              d_frame$topic == j, ]$expressions &lt;- 
+        rnorm(groupsize_n, effects[&quot;pers0_anon_0_m&quot;], sd)
+      d_frame[d_frame$persistence == 1 &amp; 
+              d_frame$anonymity == 0 &amp; 
+              d_frame$repetition == i &amp; 
+              d_frame$topic == j, ]$expressions &lt;- 
+        rnorm(groupsize_n, effects[&quot;pers1_anon_0_m&quot;], sd)
+      d_frame[d_frame$persistence == 0 &amp; 
+              d_frame$anonymity == 1 &amp; 
+              d_frame$repetition == i &amp; 
+              d_frame$topic == j, ]$expressions &lt;- 
+        rnorm(groupsize_n, effects[&quot;pers0_anon_1_m&quot;], sd)
+      d_frame[d_frame$persistence == 1 &amp; 
+              d_frame$anonymity == 1 &amp; 
+              d_frame$repetition == i &amp; 
+              d_frame$topic == j, ]$expressions &lt;- 
+        rnorm(groupsize_n, effects[&quot;pers1_anon_1_m&quot;], sd)
+    }
   }
-    
   return(d_frame)
 }</code></pre>
 </div>
@@ -745,22 +760,22 @@ write.csv(d, &quot;data_simulated.csv&quot;) # save data.</code></pre>
 <tr class="odd">
 <td align="right">0</td>
 <td align="right">0</td>
-<td align="right">0.00</td>
+<td align="right">-0.15</td>
 </tr>
 <tr class="even">
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">0.00</td>
+<td align="right">-0.03</td>
 </tr>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">0</td>
-<td align="right">-0.32</td>
+<td align="right">-0.45</td>
 </tr>
 <tr class="even">
 <td align="right">1</td>
 <td align="right">1</td>
-<td align="right">-0.31</td>
+<td align="right">-0.19</td>
 </tr>
 </tbody>
 </table>
@@ -774,20 +789,20 @@ summary(fit)</code></pre>
 ## lm(formula = expressions ~ persistence + anonymity, data = d)
 ## 
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -2.7753 -0.6269 -0.0415  0.6137  2.6430 
+##    Min     1Q Median     3Q    Max 
+## -3.011 -0.675 -0.029  0.691  3.792 
 ## 
 ## Coefficients:
-##             Estimate Std. Error t value   Pr(&gt;|t|)    
-## (Intercept)  0.00287    0.05336    0.05       0.96    
-## persistence -0.31971    0.06161   -5.19 0.00000026 ***
-## anonymity    0.00326    0.06161    0.05       0.96    
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -0.1817     0.0577   -3.15  0.00170 ** 
+## persistence  -0.2316     0.0667   -3.47  0.00054 ***
+## anonymity     0.1848     0.0667    2.77  0.00570 ** 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.95 on 957 degrees of freedom
-## Multiple R-squared:  0.0274, Adjusted R-squared:  0.0253 
-## F-statistic: 13.5 on 2 and 957 DF,  p-value: 0.00000171</code></pre>
+## Residual standard error: 1 on 957 degrees of freedom
+## Multiple R-squared:  0.0202, Adjusted R-squared:  0.0182 
+## F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <p>Results look reasonable. Both persistence and anonymity reduce
 disclosure.</p>
 </div>
@@ -825,7 +840,7 @@ for(i in 1 : n_reps){
 }
 t2 &lt;- Sys.time()
 t2 - t1</code></pre>
-<pre><code>## Time difference of 1.3 mins</code></pre>
+<pre><code>## Time difference of 1.4 mins</code></pre>
 </div>
 <div id="visualization" class="section level4">
 <h4>Visualization</h4>
@@ -891,46 +906,46 @@ to see if our population values can be reproduced.</p>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">-0.2</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
-<td align="right">-0.20</td>
+<td align="right">-0.2</td>
 <td align="right">0.2</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">-0.2</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
-<td align="right">-0.20</td>
+<td align="right">-0.2</td>
 <td align="right">0.2</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">-0.2</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
-<td align="right">-0.20</td>
+<td align="right">-0.2</td>
 <td align="right">0.2</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">-0.2</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
-<td align="right">-0.20</td>
+<td align="right">-0.2</td>
 <td align="right">0.2</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">-0.2</td>
-<td align="right">0.01</td>
+<td align="right">0</td>
 <td align="right">-0.4</td>
 <td align="right">-0.2</td>
-<td align="right">-0.21</td>
+<td align="right">-0.2</td>
 <td align="right">0.2</td>
 </tr>
 </tbody>
@@ -960,32 +975,32 @@ kable(power_freq_s)</code></pre>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">240</td>
-<td align="right">0.39</td>
-<td align="right">0.41</td>
+<td align="right">0.34</td>
+<td align="right">0.34</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.55</td>
-<td align="right">0.56</td>
+<td align="right">0.58</td>
+<td align="right">0.57</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">720</td>
-<td align="right">0.66</td>
-<td align="right">0.67</td>
+<td align="right">0.77</td>
+<td align="right">0.76</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">960</td>
-<td align="right">0.76</td>
-<td align="right">0.74</td>
+<td align="right">0.86</td>
+<td align="right">0.87</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">0.84</td>
-<td align="right">0.79</td>
+<td align="right">0.93</td>
+<td align="right">0.92</td>
 </tr>
 </tbody>
 </table>
@@ -1009,9 +1024,9 @@ power.</p>
 summary(bf)</code></pre>
 <pre><code>## Bayes factor analysis
 ## --------------
-## [1] persistence             : 35628 ±0.01%
-## [2] anonymity               : 0.072 ±0%
-## [3] persistence + anonymity : 3655  ±0.01%
+## [1] persistence             : 26  ±0.01%
+## [2] anonymity               : 3   ±0%
+## [3] persistence + anonymity : 117 ±0%
 ## 
 ## Against denominator:
 ##   Intercept only 
@@ -1034,7 +1049,7 @@ for(i in 1 : n_reps){
 }
 t2 &lt;- Sys.time()
 t2 - t1</code></pre>
-<pre><code>## Time difference of 3.1 mins</code></pre>
+<pre><code>## Time difference of 3 mins</code></pre>
 </div>
 <div id="power-estimates-1" class="section level4">
 <h4>Power estimates</h4>
@@ -1058,32 +1073,32 @@ kable(power_bf_s)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.21</td>
-<td align="right">0.21</td>
+<td align="right">0.08</td>
+<td align="right">0.07</td>
 <td align="right">240</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.27</td>
-<td align="right">0.30</td>
+<td align="right">0.17</td>
+<td align="right">0.20</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
-<td align="right">0.42</td>
-<td align="right">0.41</td>
+<td align="right">0.31</td>
+<td align="right">0.32</td>
 <td align="right">720</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
-<td align="right">0.46</td>
-<td align="right">0.49</td>
+<td align="right">0.45</td>
+<td align="right">0.48</td>
 <td align="right">960</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">0.53</td>
-<td align="right">0.58</td>
+<td align="right">0.61</td>
+<td align="right">0.59</td>
 <td align="right">1200</td>
 </tr>
 </tbody>
@@ -1185,44 +1200,44 @@ to see if our population values can be reproduced.</p>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">-0.34</td>
-<td align="right">0.00</td>
-<td align="right">-0.70</td>
+<td align="right">0.01</td>
+<td align="right">-0.7</td>
 <td align="right">-0.35</td>
-<td align="right">-0.35</td>
+<td align="right">-0.36</td>
 <td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">-0.35</td>
 <td align="right">0.00</td>
-<td align="right">-0.72</td>
+<td align="right">-0.7</td>
 <td align="right">-0.35</td>
-<td align="right">-0.36</td>
-<td align="right">0.36</td>
+<td align="right">-0.35</td>
+<td align="right">0.35</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
-<td align="right">-0.34</td>
-<td align="right">0.00</td>
-<td align="right">-0.70</td>
 <td align="right">-0.35</td>
-<td align="right">-0.36</td>
+<td align="right">0.00</td>
+<td align="right">-0.7</td>
+<td align="right">-0.34</td>
+<td align="right">-0.35</td>
 <td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">-0.35</td>
-<td align="right">0.01</td>
-<td align="right">-0.70</td>
+<td align="right">0.00</td>
+<td align="right">-0.7</td>
 <td align="right">-0.35</td>
-<td align="right">-0.36</td>
+<td align="right">-0.35</td>
 <td align="right">0.35</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">-0.35</td>
 <td align="right">0.00</td>
-<td align="right">-0.70</td>
+<td align="right">-0.7</td>
 <td align="right">-0.35</td>
 <td align="right">-0.35</td>
 <td align="right">0.35</td>
@@ -1253,32 +1268,32 @@ kable(power_freq_sm)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.67</td>
-<td align="right">0.65</td>
+<td align="right">0.79</td>
+<td align="right">0.77</td>
 <td align="right">240</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.87</td>
-<td align="right">0.87</td>
+<td align="right">0.97</td>
+<td align="right">0.96</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
-<td align="right">0.95</td>
-<td align="right">0.94</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 <td align="right">720</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
-<td align="right">0.98</td>
-<td align="right">0.98</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 <td align="right">960</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">0.99</td>
-<td align="right">0.99</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 <td align="right">1200</td>
 </tr>
 </tbody>
@@ -1334,37 +1349,37 @@ kable(power_bf_sm)</code></pre>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">0.39</td>
-<td align="right">0.42</td>
+<td align="right">0.35</td>
+<td align="right">0.36</td>
 <td align="right">240</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
-<td align="right">0.68</td>
-<td align="right">0.63</td>
+<td align="right">0.75</td>
+<td align="right">0.76</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
-<td align="right">0.79</td>
-<td align="right">0.83</td>
+<td align="right">0.94</td>
+<td align="right">0.94</td>
 <td align="right">720</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
-<td align="right">0.89</td>
-<td align="right">0.90</td>
+<td align="right">0.98</td>
+<td align="right">0.99</td>
 <td align="right">960</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
-<td align="right">0.96</td>
-<td align="right">0.95</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 <td align="right">1200</td>
 </tr>
 </tbody>
 </table>
-<p>With four repetitions, the Bayes Factor is 89.2, hence power is
+<p>With four repetitions, the Bayes Factor is 98.4, hence power is
 high.</p>
 </div>
 </div>
@@ -1399,42 +1414,42 @@ kable(tab_s)</code></pre>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">240</td>
-<td align="right">0.39</td>
-<td align="right">0.41</td>
-<td align="right">0.21</td>
-<td align="right">0.21</td>
+<td align="right">0.34</td>
+<td align="right">0.34</td>
+<td align="right">0.07</td>
+<td align="right">0.08</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.55</td>
-<td align="right">0.56</td>
-<td align="right">0.30</td>
-<td align="right">0.27</td>
+<td align="right">0.58</td>
+<td align="right">0.57</td>
+<td align="right">0.20</td>
+<td align="right">0.17</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">720</td>
-<td align="right">0.66</td>
-<td align="right">0.67</td>
-<td align="right">0.41</td>
-<td align="right">0.42</td>
+<td align="right">0.77</td>
+<td align="right">0.76</td>
+<td align="right">0.32</td>
+<td align="right">0.31</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">960</td>
-<td align="right">0.76</td>
-<td align="right">0.74</td>
-<td align="right">0.49</td>
-<td align="right">0.46</td>
+<td align="right">0.86</td>
+<td align="right">0.87</td>
+<td align="right">0.48</td>
+<td align="right">0.45</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">0.84</td>
-<td align="right">0.79</td>
-<td align="right">0.58</td>
-<td align="right">0.53</td>
+<td align="right">0.93</td>
+<td align="right">0.92</td>
+<td align="right">0.59</td>
+<td align="right">0.61</td>
 </tr>
 </tbody>
 </table>
@@ -1463,42 +1478,42 @@ kable(tab_sm)</code></pre>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">240</td>
-<td align="right">0.67</td>
-<td align="right">0.65</td>
-<td align="right">0.42</td>
-<td align="right">0.39</td>
+<td align="right">0.79</td>
+<td align="right">0.77</td>
+<td align="right">0.36</td>
+<td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
-<td align="right">0.87</td>
-<td align="right">0.87</td>
-<td align="right">0.63</td>
-<td align="right">0.68</td>
+<td align="right">0.97</td>
+<td align="right">0.96</td>
+<td align="right">0.76</td>
+<td align="right">0.75</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">720</td>
-<td align="right">0.95</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 <td align="right">0.94</td>
-<td align="right">0.83</td>
-<td align="right">0.79</td>
+<td align="right">0.94</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">960</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
+<td align="right">0.99</td>
 <td align="right">0.98</td>
-<td align="right">0.98</td>
-<td align="right">0.90</td>
-<td align="right">0.89</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">0.99</td>
-<td align="right">0.99</td>
-<td align="right">0.95</td>
-<td align="right">0.96</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
 </tr>
 </tbody>
 </table>
