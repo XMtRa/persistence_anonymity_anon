@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Planned analyses</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="power_analysis.html">Power Analysis</a>
+</li>
+<li>
+  <a href="analysis_preregistered.html">Planned Analysis</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/XMtRa/privacy_calc_exp_anon">
+    <span class="fa fa-lg fa-github"></span>
+     
+    Source Code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Planned analyses</h1>
+
+</div>
+
+
+<pre class="r"><code>library(brms)
+library(ggplot2)
+library(knitr)
+library(lme4)
+library(magrittr)
+library(mice)
+library(tidyverse)</code></pre>
+<p>In what follows, we outline how we plan to analyze the data. Please
+note that depending on violation of assumptions or non-convergence of
+models, we likely need to further adjust the model, which is why we
+cannot preregister the exact model we will ultimately run. But the
+general approach will be as follows.</p>
+<div id="load-data" class="section level1">
+<h1>Load data</h1>
+<pre class="r"><code>d &lt;- read.csv(&quot;data_simulated.csv&quot;)</code></pre>
+</div>
+<div id="data-wrangling" class="section level1">
+<h1>Data wrangling</h1>
+<pre class="r"><code>d &lt;- d %&gt;% 
+  mutate(persistence = persistence - .5,
+         anonymity = anonymity - .5,
+         topic = factor(topic, labels = c(&quot;corona&quot;, &quot;gender&quot;, &quot;other&quot;)),
+         repetition = as.factor(repetition),
+         group = as.factor(group),
+         # make expressions as positive integers
+         expressions = abs(min(expressions)) + expressions,
+         expressions = as.integer(expressions)
+         )
+
+# make expressions zero-inflated
+d[sample(c(1:nrow(d)), 100), ]$expressions &lt;- 0
+
+# introduce NAs
+d[sample(c(1:nrow(d)), 30), ]$expressions &lt;- NA</code></pre>
+</div>
+<div id="data-imputation" class="section level1">
+<h1>Data imputation</h1>
+<pre class="r"><code>d &lt;- mice(d, m = 100, print = FALSE)</code></pre>
+</div>
+<div id="analyze-data" class="section level1">
+<h1>Analyze data</h1>
+<div id="bayesian-mixed-effects-modeling" class="section level2">
+<h2>Bayesian mixed effects modeling</h2>
+<div id="fixed-effects" class="section level3">
+<h3>Fixed effects</h3>
+<pre class="r"><code>fit_fe &lt;- 
+  brm_multiple(
+    expressions ~ 1 + persistence * anonymity + 
+      (1 | topic) + 
+      (1 | group), 
+    data = d,
+    silent = 2,
+    refresh = 0,  
+    chains = 2,
+    family = zero_inflated_poisson(&quot;log&quot;)
+    )
+
+summary(fit_fe)</code></pre>
+<pre><code>##  Family: zero_inflated_poisson 
+##   Links: mu = log; zi = identity 
+## Formula: expressions ~ 1 + persistence * anonymity + (1 | topic) + (1 | group) 
+##    Data: d (Number of observations: 960) 
+##   Draws: 200 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 200000
+## 
+## Group-Level Effects: 
+## ~group (Number of levels: 48) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.03      0.02     0.00     0.09 1.03     4258     6005
+## 
+## ~topic (Number of levels: 3) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.10      0.18     0.00     0.51 1.09     1378      483
+## 
+## Population-Level Effects: 
+##                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+## Intercept                 0.81      0.09     0.61     0.98 1.11     1056
+## persistence              -0.10      0.05    -0.19    -0.01 1.05     2387
+## anonymity                 0.12      0.05     0.03     0.21 1.02     6012
+## persistence:anonymity     0.12      0.09    -0.07     0.31 1.04     3042
+##                       Tail_ESS
+## Intercept                  557
+## persistence               1388
+## anonymity                26128
+## persistence:anonymity     2259
+## 
+## Family Specific Parameters: 
+##    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## zi     0.03      0.01     0.01     0.06 1.03     4088     7563
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+<div id="random-effects" class="section level3">
+<h3>Random effects</h3>
+<pre class="r"><code>fit_re &lt;- 
+  brm_multiple(
+    expressions ~ 1 + persistence * anonymity + 
+      (1 + persistence * anonymity | topic) + 
+      (1 + persistence * anonymity | group), 
+    data = d,
+    silent = 2,
+    refresh = 0, 
+    chains = 2,
+    family = zero_inflated_poisson(&quot;log&quot;)
+    )
+
+summary(fit_re)</code></pre>
+<pre><code>##  Family: zero_inflated_poisson 
+##   Links: mu = log; zi = identity 
+## Formula: expressions ~ 1 + persistence * anonymity + (1 + persistence * anonymity | topic) + (1 + persistence * anonymity | group) 
+##    Data: d (Number of observations: 960) 
+##   Draws: 200 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup draws = 200000
+## 
+## Group-Level Effects: 
+## ~group (Number of levels: 48) 
+##                                        Estimate Est.Error l-95% CI u-95% CI
+## sd(Intercept)                              0.03      0.02     0.00     0.09
+## sd(persistence)                            0.06      0.05     0.00     0.18
+## sd(anonymity)                              0.06      0.05     0.00     0.18
+## sd(persistence:anonymity)                  0.13      0.10     0.00     0.35
+## cor(Intercept,persistence)                -0.02      0.45    -0.82     0.80
+## cor(Intercept,anonymity)                  -0.02      0.45    -0.82     0.81
+## cor(persistence,anonymity)                 0.03      0.45    -0.80     0.82
+## cor(Intercept,persistence:anonymity)       0.03      0.45    -0.81     0.83
+## cor(persistence,persistence:anonymity)    -0.01      0.45    -0.82     0.80
+## cor(anonymity,persistence:anonymity)      -0.03      0.45    -0.82     0.80
+##                                        Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)                          1.01    10176     6748
+## sd(persistence)                        1.01    14796    35021
+## sd(anonymity)                          1.01    12709    25619
+## sd(persistence:anonymity)              1.01    24987    17569
+## cor(Intercept,persistence)             1.01    10668    33939
+## cor(Intercept,anonymity)               1.01     8056    11459
+## cor(persistence,anonymity)             1.01    21392    26840
+## cor(Intercept,persistence:anonymity)   1.02     6799     2731
+## cor(persistence,persistence:anonymity) 1.01    16537    14354
+## cor(anonymity,persistence:anonymity)   1.01    16826    38828
+## 
+## ~topic (Number of levels: 3) 
+##                                        Estimate Est.Error l-95% CI u-95% CI
+## sd(Intercept)                              0.12      0.19     0.00     0.69
+## sd(persistence)                            0.30      0.40     0.01     1.48
+## sd(anonymity)                              0.25      0.32     0.01     1.24
+## sd(persistence:anonymity)                  0.41      0.52     0.01     1.92
+## cor(Intercept,persistence)                -0.02      0.47    -0.85     0.82
+## cor(Intercept,anonymity)                   0.02      0.47    -0.85     0.85
+## cor(persistence,anonymity)                -0.05      0.47    -0.85     0.81
+## cor(Intercept,persistence:anonymity)       0.02      0.47    -0.83     0.84
+## cor(persistence,persistence:anonymity)    -0.03      0.47    -0.85     0.82
+## cor(anonymity,persistence:anonymity)       0.03      0.46    -0.82     0.84
+##                                        Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)                          1.04     3124     1290
+## sd(persistence)                        1.04     3070     1164
+## sd(anonymity)                          1.02     5220     3340
+## sd(persistence:anonymity)              1.02     7313     2827
+## cor(Intercept,persistence)             1.01     8452     3828
+## cor(Intercept,anonymity)               1.04     3173     1841
+## cor(persistence,anonymity)             1.02     7732     7564
+## cor(Intercept,persistence:anonymity)   1.01     8512    10112
+## cor(persistence,persistence:anonymity) 1.02     7849    22289
+## cor(anonymity,persistence:anonymity)   1.01    14485    35072
+## 
+## Population-Level Effects: 
+##                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+## Intercept                 0.81      0.10     0.58     1.02 1.05     2513
+## persistence              -0.10      0.23    -0.65     0.38 1.05     2312
+## anonymity                 0.12      0.19    -0.30     0.55 1.03     4335
+## persistence:anonymity     0.11      0.33    -0.63     0.79 1.02     4963
+##                       Tail_ESS
+## Intercept                 1209
+## persistence               1051
+## anonymity                 3302
+## persistence:anonymity     5606
+## 
+## Family Specific Parameters: 
+##    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## zi     0.03      0.01     0.01     0.06 1.02     6216    21221
+## 
+## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+</div>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

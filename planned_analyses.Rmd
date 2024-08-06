@@ -1,0 +1,97 @@
+---
+title: "Planned analyses"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = T, warning = F, message = F)
+set.seed(1)
+options(scipen = 10000, digits = 2)
+```
+
+```{r packages, message=F, results='hide', cache = F}
+library(brms)
+library(ggplot2)
+library(knitr)
+library(lme4)
+library(magrittr)
+library(mice)
+library(tidyverse)
+```
+
+In what follows, we outline how we plan to analyze the data. Please note that depending on violation of assumptions or non-convergence of models, we likely need to further adjust the model, which is why we cannot preregister the exact model we will ultimately run. But the general approach will be as follows.
+
+# Load data
+
+```{r load-data}
+d <- read.csv("data_simulated.csv")
+```
+
+# Data wrangling
+
+```{r wrangle-data}
+d <- d %>% 
+  mutate(persistence = persistence - .5,
+         anonymity = anonymity - .5,
+         topic = factor(topic, labels = c("corona", "gender", "other")),
+         repetition = as.factor(repetition),
+         group = as.factor(group),
+         # make expressions as positive integers
+         expressions = abs(min(expressions)) + expressions,
+         expressions = as.integer(expressions)
+         )
+
+# make expressions zero-inflated
+d[sample(c(1:nrow(d)), 100), ]$expressions <- 0
+
+# introduce NAs
+d[sample(c(1:nrow(d)), 30), ]$expressions <- NA
+```
+
+# Data imputation
+
+```{r impute-data}
+d <- mice(d, m = 100, print = FALSE)
+```
+
+# Analyze data
+## Bayesian mixed effects modeling
+### Fixed effects
+
+```{r fixed-effects-model, message=F, warning=F}
+fit_fe <- 
+  brm_multiple(
+    expressions ~ 1 + persistence * anonymity + 
+      (1 | topic) + 
+      (1 | group), 
+    data = d,
+    silent = 2,
+    refresh = 0,  
+    chains = 2,
+    family = zero_inflated_poisson("log")
+    )
+
+summary(fit_fe)
+```
+
+### Random effects
+
+```{r random-effects-model, message=F, warning=F}
+fit_re <- 
+  brm_multiple(
+    expressions ~ 1 + persistence * anonymity + 
+      (1 + persistence * anonymity | topic) + 
+      (1 + persistence * anonymity | group), 
+    data = d,
+    silent = 2,
+    refresh = 0, 
+    chains = 2,
+    family = zero_inflated_poisson("log")
+    )
+
+summary(fit_re)
+```

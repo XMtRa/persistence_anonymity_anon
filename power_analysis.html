@@ -13,7 +13,7 @@
 
 <title>Power Analysis</title>
 
-<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -35,8 +35,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.0/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.0/css/v4-shims.min.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -363,10 +363,10 @@ design characteristics of online platforms affect online political
 participation. In the study, people use a social networking site
 (discord) on which they discuss political matters. Participants will
 communicate in groups of 20 people each. This number is fixed for
-theory-related reasons, that is medium scale group communication. The
-dependent variable is how much people discuss (measured via <em>number
-of opinion expressions</em>). We’re interested how different SNS designs
-affect communication.</p>
+theory-related reasons, as we are interested in medium scale group
+communication. The dependent variable is how much people discuss
+(measured via <em>number of opinion expressions</em>). We’re interested
+how different SNS designs affect communication.</p>
 <p>The study design is as follows:</p>
 <ul>
 <li>The website is experimentally manipulated (2 x 2 design).
@@ -388,20 +388,23 @@ groups. Hence, the minimum sample size 12 x 20 = 240 participants.</p>
 thrice, etc? Hence, the factor to change/affect power is
 <em>repetition</em>, ranging from 1 to 5. Note that financing would only
 allow 4 repetitions, so the fifth is out of curiosity.</p>
-<p>Also note that we are here simulating data which we then analyze. The
-data simulation is somewhat rudimentary.</p>
+<p>We are simulating data which we then analyze. The data simulation is
+somewhat rudimentary.</p>
 <ul>
-<li>First, In reality, the data are nested: in groups (some groups are
-more active than others) and topics (some topics elicit more comments
-than others). Because we are lacking information on the covariance
-structure, we did not implement the data’s nested structure. In
-conclusion, we also did not analyze the data using mixed effects models,
-which account for hierachical structure.</li>
-<li>Second, opposed to what we model here, our outcome variable is
-likely not normally distributed. As a result, if this turns out to be
-the case we will also analyze the data using Bayesian models that can
-model the outcome variable with for example a poisson or gamma
-distribution, also taking into account zero-inflation.</li>
+<li>In reality, the data are nested: in groups (some groups are more
+active than others) and topics (some topics elicit more comments than
+others). Because we are lacking information on the covariance structure,
+we did not implement the data’s nested structure into our power
+analyses. We also did not analyze the data using mixed effects models,
+which account for nested/hierarchical structure.</li>
+<li>We build our simulation on standardized data. We do so, as we’re
+lacking the necessary information on effects sizes and variances in
+absolute terms.</li>
+<li>Opposed to what we model here, our outcome variable will not be
+normally distributed. Several participants will likely not express their
+opinions, whereas some might do so quite actively. As a result, we will
+analyze the data using Bayesian models modeling the outcome variable
+with a zero-inflated poisson distribution.</li>
 </ul>
 <p>In conclusion, in our paper we will analyze the data using (Bayesian)
 mixed effects modeling using lme4 and/or brms.</p>
@@ -503,8 +506,6 @@ mixed effects modeling using lme4 and/or brms.</p>
   )
 
   
-  if(approach == &quot;frequentist&quot;){
-    
     # get estimates from regression
     fit &lt;- lm(expressions ~ persistence + anonymity, object)
     fit_rslt &lt;- tidy(fit)
@@ -517,24 +518,6 @@ mixed effects modeling using lme4 and/or brms.</p>
       anonymity_est = fit_rslt[fit_rslt$term == &quot;anonymity&quot;,]$estimate,
       anonymity_p = fit_rslt[fit_rslt$term == &quot;anonymity&quot;,]$p.value
     )
-  } 
-  
-  if(approach == &quot;bayes_factor&quot;) {
-    
-    # compute bayes factor
-    bf &lt;- BayesFactor::regressionBF(expressions ~ persistence + anonymity, object, progress = F)
-    
-    # extract bayes factor
-    bf_pers &lt;- extractBF(bf)[&quot;persistence&quot;, ]$bf
-    BF_anon &lt;- extractBF(bf)[&quot;anonymity&quot;, ]$bf
-    
-    # combine results
-    results &lt;- cbind(
-      results,
-      bf_pers = bf_pers,
-      BF_anon = BF_anon
-    )
-  }
   return(results)
 }</code></pre>
 </div>
@@ -818,10 +801,8 @@ the set-up be repeated.</p>
 </div>
 <div id="small-effects" class="section level2">
 <h2>Small effects</h2>
-<div id="frequentist" class="section level3">
-<h3>Frequentist</h3>
-<div id="run-analyses" class="section level4">
-<h4>Run analyses</h4>
+<div id="run-analyses" class="section level3">
+<h3>Run analyses</h3>
 <p>Let’s next run our actual power analysis, using the effect sizes
 defined above (small standardized effects).</p>
 <p>We run a power analysis with 1000 simulations per design. We test 5
@@ -842,8 +823,8 @@ t2 &lt;- Sys.time()
 t2 - t1</code></pre>
 <pre><code>## Time difference of 1.4 mins</code></pre>
 </div>
-<div id="visualization" class="section level4">
-<h4>Visualization</h4>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
 <p>Let’s inspect the results. First persistence:</p>
 <pre class="r"><code>ggplot(sims_freq_s) +
   geom_point(aes(sim, persistence_est, color = persistence_p &lt; .05), 
@@ -865,8 +846,8 @@ results.</p>
 <p><img src="power_analysis_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>Looks good.</p>
 </div>
-<div id="cell-means-main-effects" class="section level4">
-<h4>Cell means &amp; main effects</h4>
+<div id="cell-means-main-effects" class="section level3">
+<h3>Cell means &amp; main effects</h3>
 <p>Next, we compute the average means in the four cells averaged across
 simulations, plus the two main effects. This is more of a sanity check
 to see if our population values can be reproduced.</p>
@@ -953,8 +934,8 @@ to see if our population values can be reproduced.</p>
 <p>Shows that the means resemble those we defined a priori. Same for
 main effects.</p>
 </div>
-<div id="power-estimates" class="section level4">
-<h4>Power estimates</h4>
+<div id="power-estimates" class="section level3">
+<h3>Power estimates</h3>
 <p>Now, let’s compute power for each number of replication.</p>
 <pre class="r"><code>power_freq_s &lt;- sims_freq_s %&gt;% 
   group_by(reps) %&gt;% 
@@ -1014,98 +995,6 @@ power_fig</code></pre>
 power.</p>
 </div>
 </div>
-<div id="bayesian" class="section level3">
-<h3>Bayesian</h3>
-<p>Next, we analyze the data using Bayes factors.</p>
-<div id="test-run-1" class="section level4">
-<h4>Test run</h4>
-<p>We first do a test run.</p>
-<pre class="r"><code>bf &lt;- BayesFactor::regressionBF(expressions ~ persistence + anonymity, d)
-summary(bf)</code></pre>
-<pre><code>## Bayes factor analysis
-## --------------
-## [1] persistence             : 26  ±0.01%
-## [2] anonymity               : 3   ±0%
-## [3] persistence + anonymity : 117 ±0%
-## 
-## Against denominator:
-##   Intercept only 
-## ---
-## Bayes factor type: BFlinearModel, JZS</code></pre>
-</div>
-<div id="run-analyses-1" class="section level4">
-<h4>Run analyses</h4>
-<p>We then run the power analyses.</p>
-<pre class="r"><code># create empy data frame
-columns &lt;- c(&quot;sim&quot;, &quot;reps&quot;, &quot;n&quot;, &quot;per0_anon0_m&quot;, &quot;per0_anon1_m&quot;, 
-             &quot;per1_anon0_m&quot;, &quot;per1_anon1_m&quot;, &quot;BF_pers&quot;, &quot;BF_anon&quot;)
-sims_bf_s &lt;- data.frame(matrix(nrow = 0, ncol = length(columns))) 
-colnames(sims_bf_s) = columns
-
-t1 &lt;- Sys.time()
-for(i in 1 : n_reps){
-  repetition_n  &lt;- i
-  sims_bf_s &lt;- rbind(sims_bf_s, est_pow(approach = &quot;bayes_factor&quot;, sims_n = n_sim))
-}
-t2 &lt;- Sys.time()
-t2 - t1</code></pre>
-<pre><code>## Time difference of 3 mins</code></pre>
-</div>
-<div id="power-estimates-1" class="section level4">
-<h4>Power estimates</h4>
-<p>We report how often the <em>Bayes Factor was above 10</em>, hence
-very noteworthy.</p>
-<pre class="r"><code>power_bf_s &lt;- sims_bf_s %&gt;% 
-  group_by(reps) %&gt;% 
-  summarise(`BF_anon &gt; 10` = sum(BF_anon &gt; 10) / n_sim,
-            `bf_pers &gt; 10` = sum(bf_pers &gt; 10) / n_sim,
-            n = max(n))
-kable(power_bf_s)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">reps</th>
-<th align="right">BF_anon &gt; 10</th>
-<th align="right">bf_pers &gt; 10</th>
-<th align="right">n</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">0.08</td>
-<td align="right">0.07</td>
-<td align="right">240</td>
-</tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="right">0.17</td>
-<td align="right">0.20</td>
-<td align="right">480</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="right">0.31</td>
-<td align="right">0.32</td>
-<td align="right">720</td>
-</tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="right">0.45</td>
-<td align="right">0.48</td>
-<td align="right">960</td>
-</tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="right">0.61</td>
-<td align="right">0.59</td>
-<td align="right">1200</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
 <div id="small-to-medium-effects" class="section level2">
 <h2>Small-to-medium effects</h2>
 <p>Let’s next rerun our power analysis, using slightly larger effect
@@ -1117,10 +1006,8 @@ pers1_anon_1_m &lt;- -0.35
 effects_est &lt;- c(pers0_anon_0_m, pers0_anon_1_m, pers1_anon_0_m, pers1_anon_1_m)
 names(effects_est) &lt;- c(&quot;pers0_anon_0_m&quot;, &quot;pers0_anon_1_m&quot;, &quot;pers1_anon_0_m&quot;, &quot;pers1_anon_1_m&quot;)
 sd_est &lt;- 1</code></pre>
-<div id="frequentist-1" class="section level3">
-<h3>Frequentist</h3>
-<div id="run-analyses-2" class="section level4">
-<h4>Run analyses</h4>
+<div id="run-analyses-1" class="section level3">
+<h3>Run analyses</h3>
 <p>Everything as above, but now assuming larger effects.</p>
 <pre class="r"><code># create empy data frame
 columns &lt;- c(&quot;sim&quot;, &quot;reps&quot;, &quot;per0_anon0_m&quot;, &quot;per0_anon1_m&quot;, 
@@ -1137,8 +1024,8 @@ for(i in 1 : n_reps){
 t2 &lt;- Sys.time()
 t2 - t1</code></pre>
 </div>
-<div id="visualization-1" class="section level4">
-<h4>Visualization</h4>
+<div id="visualization-1" class="section level3">
+<h3>Visualization</h3>
 <p>Let’s inspect the results. First persistence:</p>
 <pre class="r"><code>ggplot(sims_freq_sm) +
   geom_point(aes(sim, persistence_est, color = persistence_p &lt; .05), 
@@ -1146,7 +1033,7 @@ t2 - t1</code></pre>
   scale_color_manual(values = c(&quot;darkgrey&quot;, &quot;blue&quot;)) +
   facet_wrap(facets = &quot;reps&quot;, nrow = 1) +
   labs(color = &quot;significant&quot;)</code></pre>
-<p><img src="power_analysis_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><img src="power_analysis_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 <p>Shows that with more repetitions, effect size moves closer to actual
 population value.</p>
 <p>To make sure, let’s next check anonymity – should provide identical
@@ -1157,11 +1044,11 @@ results.</p>
   scale_color_manual(values = c(&quot;darkgrey&quot;, &quot;blue&quot;)) +
   facet_wrap(facets = &quot;reps&quot;, nrow = 1) +
   labs(color = &quot;significant&quot;)</code></pre>
-<p><img src="power_analysis_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p><img src="power_analysis_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 <p>Looks good.</p>
 </div>
-<div id="cell-means-main-effects-1" class="section level4">
-<h4>Cell means &amp; main effects</h4>
+<div id="cell-means-main-effects-1" class="section level3">
+<h3>Cell means &amp; main effects</h3>
 <p>Next, we compute the average means in the four cells averaged across
 simulations, plus the two main effects. This is more of a sanity check
 to see if our population values can be reproduced.</p>
@@ -1199,17 +1086,17 @@ to see if our population values can be reproduced.</p>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
-<td align="right">-0.34</td>
-<td align="right">0.01</td>
+<td align="right">-0.35</td>
+<td align="right">0</td>
 <td align="right">-0.7</td>
 <td align="right">-0.35</td>
-<td align="right">-0.36</td>
+<td align="right">-0.35</td>
 <td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">-0.35</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.7</td>
 <td align="right">-0.35</td>
 <td align="right">-0.35</td>
@@ -1218,16 +1105,16 @@ to see if our population values can be reproduced.</p>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">-0.35</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.7</td>
-<td align="right">-0.34</td>
+<td align="right">-0.35</td>
 <td align="right">-0.35</td>
 <td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">-0.35</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.7</td>
 <td align="right">-0.35</td>
 <td align="right">-0.35</td>
@@ -1236,7 +1123,7 @@ to see if our population values can be reproduced.</p>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">-0.35</td>
-<td align="right">0.00</td>
+<td align="right">0</td>
 <td align="right">-0.7</td>
 <td align="right">-0.35</td>
 <td align="right">-0.35</td>
@@ -1247,8 +1134,8 @@ to see if our population values can be reproduced.</p>
 <p>Shows that the means resemble those we defined a priori. Same for
 main effects.</p>
 </div>
-<div id="power-estimates-2" class="section level4">
-<h4>Power estimates</h4>
+<div id="power-estimates-1" class="section level3">
+<h3>Power estimates</h3>
 <p>Now, let’s compute power for each number of replication.</p>
 <pre class="r"><code>power_freq_sm &lt;- sims_freq_sm %&gt;% 
   group_by(reps) %&gt;% 
@@ -1275,7 +1162,7 @@ kable(power_freq_sm)</code></pre>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">0.97</td>
-<td align="right">0.96</td>
+<td align="right">0.97</td>
 <td align="right">480</td>
 </tr>
 <tr class="odd">
@@ -1305,83 +1192,7 @@ power_fig &lt;- ggplot(dat_fr_sm, aes(reps, effect, color = manipulation)) +
   geom_point(alpha = .9) +
   scale_x_discrete(limits = c(1:n_reps))
 power_fig</code></pre>
-<p><img src="power_analysis_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
-</div>
-</div>
-<div id="bayesian-1" class="section level3">
-<h3>Bayesian</h3>
-<div id="run-analyses-3" class="section level4">
-<h4>Run analyses</h4>
-<pre class="r"><code># create empy data frame
-columns &lt;- c(&quot;sim&quot;, &quot;reps&quot;, &quot;n&quot;, &quot;per0_anon0_m&quot;, &quot;per0_anon1_m&quot;, 
-             &quot;per1_anon0_m&quot;, &quot;per1_anon1_m&quot;, &quot;BF_pers&quot;, &quot;BF_anon&quot;)
-sims_bf_sm &lt;- data.frame(matrix(nrow = 0, ncol = length(columns))) 
-colnames(sims_bf_sm) = columns
-
-t1 &lt;- Sys.time()
-for(i in 1 : n_reps){
-  repetition_n  &lt;- i
-  sims_bf_sm &lt;- rbind(sims_bf_sm, est_pow(approach = &quot;bayes_factor&quot;, sims_n = n_sim))
-}
-t2 &lt;- Sys.time()
-t2 - t1</code></pre>
-<pre><code>## Time difference of 3 mins</code></pre>
-</div>
-<div id="power-estimates-3" class="section level4">
-<h4>Power estimates</h4>
-<p>We next report how often the Bayes Factor was above 10, hence very
-noteworthy.</p>
-<pre class="r"><code>power_bf_sm &lt;- sims_bf_sm %&gt;% 
-  group_by(reps) %&gt;% 
-  summarise(`BF_anon &gt; 10` = sum(BF_anon &gt; 10) / n_sim,
-            `bf_pers &gt; 10` = sum(bf_pers &gt; 10) / n_sim,
-            n = max(n))
-kable(power_bf_sm)</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th align="right">reps</th>
-<th align="right">BF_anon &gt; 10</th>
-<th align="right">bf_pers &gt; 10</th>
-<th align="right">n</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">0.35</td>
-<td align="right">0.36</td>
-<td align="right">240</td>
-</tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="right">0.75</td>
-<td align="right">0.76</td>
-<td align="right">480</td>
-</tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="right">0.94</td>
-<td align="right">0.94</td>
-<td align="right">720</td>
-</tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="right">0.98</td>
-<td align="right">0.99</td>
-<td align="right">960</td>
-</tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="right">1.00</td>
-<td align="right">1.00</td>
-<td align="right">1200</td>
-</tr>
-</tbody>
-</table>
-<p>With four repetitions, the Bayes Factor is 98.4, hence power is
-high.</p>
-</div>
+<p><img src="power_analysis_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
 </div>
 </div>
 </div>
@@ -1394,9 +1205,7 @@ high.</p>
   Replications = power_freq_s$reps,
   N = power_freq_s$n,
   pers_power = power_freq_s$persistence,
-  anon_power = power_freq_s$anonymity,
-  pers_bf = power_bf_s$`bf_pers &gt; 10`,
-  anon_bf = power_bf_s$`BF_anon &gt; 10`
+  anon_power = power_freq_s$anonymity
 )
 kable(tab_s)</code></pre>
 <table>
@@ -1406,8 +1215,6 @@ kable(tab_s)</code></pre>
 <th align="right">N</th>
 <th align="right">pers_power</th>
 <th align="right">anon_power</th>
-<th align="right">pers_bf</th>
-<th align="right">anon_bf</th>
 </tr>
 </thead>
 <tbody>
@@ -1416,40 +1223,30 @@ kable(tab_s)</code></pre>
 <td align="right">240</td>
 <td align="right">0.34</td>
 <td align="right">0.34</td>
-<td align="right">0.07</td>
-<td align="right">0.08</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
 <td align="right">0.58</td>
 <td align="right">0.57</td>
-<td align="right">0.20</td>
-<td align="right">0.17</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">720</td>
 <td align="right">0.77</td>
 <td align="right">0.76</td>
-<td align="right">0.32</td>
-<td align="right">0.31</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">960</td>
 <td align="right">0.86</td>
 <td align="right">0.87</td>
-<td align="right">0.48</td>
-<td align="right">0.45</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
 <td align="right">0.93</td>
 <td align="right">0.92</td>
-<td align="right">0.59</td>
-<td align="right">0.61</td>
 </tr>
 </tbody>
 </table>
@@ -1458,9 +1255,7 @@ kable(tab_s)</code></pre>
   Replications = power_freq_sm$reps,
   N = power_freq_sm$n,
   pers_power = power_freq_sm$persistence, 
-  anon_power = power_freq_sm$anonymity,
-  pers_bf = power_bf_sm$`bf_pers &gt; 10`,
-  anon_bf = power_bf_sm$`BF_anon &gt; 10`
+  anon_power = power_freq_sm$anonymity
 )
 kable(tab_sm)</code></pre>
 <table>
@@ -1470,8 +1265,6 @@ kable(tab_sm)</code></pre>
 <th align="right">N</th>
 <th align="right">pers_power</th>
 <th align="right">anon_power</th>
-<th align="right">pers_bf</th>
-<th align="right">anon_bf</th>
 </tr>
 </thead>
 <tbody>
@@ -1480,38 +1273,28 @@ kable(tab_sm)</code></pre>
 <td align="right">240</td>
 <td align="right">0.79</td>
 <td align="right">0.77</td>
-<td align="right">0.36</td>
-<td align="right">0.35</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">480</td>
 <td align="right">0.97</td>
-<td align="right">0.96</td>
-<td align="right">0.76</td>
-<td align="right">0.75</td>
+<td align="right">0.97</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">720</td>
 <td align="right">1.00</td>
 <td align="right">1.00</td>
-<td align="right">0.94</td>
-<td align="right">0.94</td>
 </tr>
 <tr class="even">
 <td align="right">4</td>
 <td align="right">960</td>
 <td align="right">1.00</td>
 <td align="right">1.00</td>
-<td align="right">0.99</td>
-<td align="right">0.98</td>
 </tr>
 <tr class="odd">
 <td align="right">5</td>
 <td align="right">1200</td>
-<td align="right">1.00</td>
-<td align="right">1.00</td>
 <td align="right">1.00</td>
 <td align="right">1.00</td>
 </tr>
@@ -1520,36 +1303,35 @@ kable(tab_sm)</code></pre>
 </div>
 <div id="figures" class="section level2">
 <h2>Figures</h2>
-<pre class="r"><code>dat_bf_s &lt;- pivot_longer(power_bf_s, c(-reps, -n), names_to = &quot;manipulation&quot;, values_to = &quot;effect&quot;)
-dat_bf_s$effectsize &lt;- &quot;small&quot;
-dat_bf_sm &lt;- pivot_longer(power_bf_sm, c(-reps, -n), names_to = &quot;manipulation&quot;, values_to = &quot;effect&quot;)
-dat_bf_sm$effectsize &lt;- &quot;small-to-medium&quot;
-dat_bf &lt;- rbind(dat_bf_s, dat_bf_sm)
-dat_bf$analysis &lt;- &quot;Bayes Factor &gt; 10&quot;
-dat_bf$manipulation &lt;- recode(dat_bf$manipulation, `bf_pers &gt; 10` = &quot;persistence&quot;, `BF_anon &gt; 10` = &quot;anonymity&quot;)
+<pre class="r"><code># dat_bf_s &lt;- pivot_longer(power_bf_s, c(-reps, -n), names_to = &quot;manipulation&quot;, values_to = &quot;effect&quot;)
+# dat_bf_s$effectsize &lt;- &quot;small&quot;
+# dat_bf_sm &lt;- pivot_longer(power_bf_sm, c(-reps, -n), names_to = &quot;manipulation&quot;, values_to = &quot;effect&quot;)
+# dat_bf_sm$effectsize &lt;- &quot;small-to-medium&quot;
+# dat_bf &lt;- rbind(dat_bf_s, dat_bf_sm)
+# dat_bf$analysis &lt;- &quot;Bayes Factor &gt; 10&quot;
+# dat_bf$manipulation &lt;- recode(dat_bf$manipulation, `bf_pers &gt; 10` = &quot;persistence&quot;, `BF_anon &gt; 10` = &quot;anonymity&quot;)
 
 dat_fr_s$effectsize &lt;- &quot;small&quot;
 dat_fr_sm$effectsize &lt;- &quot;small-to-medium&quot;
 dat_fr &lt;- rbind(dat_fr_s, dat_fr_sm)
-dat_fr$analysis &lt;- &quot;Frequentist&quot;
+# dat_fr$analysis &lt;- &quot;Frequentist&quot;
 
-dat &lt;- rbind(dat_fr, dat_bf) %&gt;% 
+dat &lt;- dat_fr %&gt;% 
   rename(Manipulation = manipulation,
          `Effect size` = effectsize,
          Effect = effect,
          Replications = reps) %&gt;% 
   mutate(
-    analysis = factor(analysis, levels = c(&quot;Frequentist&quot;, &quot;Bayes Factor &gt; 10&quot;)),
+    # analysis = factor(analysis, levels = c(&quot;Frequentist&quot;, &quot;Bayes Factor &gt; 10&quot;)),
     `Effect size` = factor(`Effect size`, levels = c(&quot;small-to-medium&quot;, &quot;small&quot;)))
 
 power_fig &lt;- ggplot(dat, aes(Replications, Effect, color = `Effect size`, shape = Manipulation)) +
   scale_color_manual(values=c(&quot;black&quot;, &quot;grey60&quot;)) +
   geom_vline(xintercept = 4, linetype = &quot;dashed&quot;, color = &quot;grey&quot;) + 
   geom_point(alpha = .9) +
-  scale_x_discrete(limits = c(1:n_reps)) +
-  facet_wrap(vars(analysis))
+  scale_x_discrete(limits = c(1:n_reps))
 power_fig</code></pre>
-<p><img src="power_analysis_files/figure-html/unnamed-chunk-34-1.png" width="576" /></p>
+<p><img src="power_analysis_files/figure-html/unnamed-chunk-29-1.png" width="576" /></p>
 <pre class="r"><code>ggsave(&quot;figures/fig_power.png&quot;, width = 8, height = 4)</code></pre>
 </div>
 </div>

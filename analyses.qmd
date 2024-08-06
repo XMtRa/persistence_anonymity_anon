@@ -1,0 +1,852 @@
+---
+title: "Analyses"
+format: 
+  html:
+    self-contained: true
+    toc: true
+    toc-float: true
+execute:
+  cache: true
+---
+
+# Set-up
+## Packages
+
+```{r}
+#| message: false
+#| result: hide
+library(brms)
+library(ggplot2)
+library(lme4)
+library(performance)
+library(see)
+library(sjmisc)
+library(tidyverse)
+
+options(
+  digits = 3
+)
+set.seed(170819)
+```
+
+## Data
+
+```{r}
+d <- read_csv("data/data.csv")
+# same as above; but original file wording
+# d <- read_csv("data/DataAggregated_T1T2_costsbenefits.csv")
+# load("data/image.RData")
+
+# recode to make as sum coding
+d$anonymity_dev <- factor(d$anonymity)
+contrasts(d$anonymity_dev) <- contr.sum(2)
+d$persistence_dev <- factor(d$persistence)
+contrasts(d$persistence_dev) <- contr.sum(2)
+
+d <- d %>% 
+  rename(
+    group = roles,
+    op_expr = n_OE
+  )
+```
+
+# Descriptives
+
+Let's inspect distribution of opinion expressions.
+
+```{r}
+ggplot(d, aes(op_expr)) +
+  geom_histogram(binwidth = 1)
+```
+
+Looks like a zero-inflated poisson distribution. Confirms our preregistered approach to analyze data using zero-inflated Poisson approach.
+
+```{r}
+nrow(d[d$op_expr == 0, ]) / nrow(d)
+```
+
+Overall, 21% of participants without any opinion expressions.
+
+Let's look at distribution of experimental groups.
+
+```{r}
+d %>% 
+  select(persistence, anonymity) %>% 
+  table
+```
+
+Distribution among groups perfect.
+
+```{r}
+d %>% 
+  select(topic) %>% 
+  table
+```
+
+Distribution of topics also perfect.
+
+Let's check if groups are nested in topics:
+
+```{r}
+is_nested(d$topic, d$group)
+```
+
+Indeed the case. 
+
+We first look at the experimental group's descriptives
+
+```{r}
+d %>% 
+  group_by(persistence) %>% 
+  summarize(op_expr_m = mean(op_expr))
+```
+
+Looking at persistence, we see there's virtually no difference among groups.
+
+```{r}
+d %>% 
+  group_by(anonymity) %>% 
+  summarize(op_expr_m = mean(op_expr))
+```
+
+People who with _less_ anonymity communicated _more_. But the difference isn't particularly large.
+
+```{r}
+d %>% 
+  group_by(persistence, anonymity) %>% 
+  summarize(op_expr_m = mean(op_expr))
+```
+
+Looking at both groups combined, we see that low anonymity and low persistence created highest participation. But differences among groups aren't large.
+
+```{r}
+d %>% 
+  group_by(group) %>% 
+  summarize(
+    anonymity = anonymity[1],
+    persistence = persistence[1],
+    topic = topic[1],
+    op_expr_m = mean(op_expr)
+    ) %>% 
+  rmarkdown::paged_table()
+```
+
+Looking at the various individual groups, we do see some difference. Generally, this shows that individually, communication varied. But not so much systematically across experimental groups.
+
+```{r}
+d %>% 
+  group_by(topic) %>% 
+  summarize(op_expr_m = mean(op_expr))
+```
+
+Looking at topics specifically, we also see that there's some variance.
+
+# Manipulation Check
+
+Let's see if respondents indeed perceived the experimental manipulations.
+
+```{r}
+model_pers <- lm(
+  per_persistence ~ persistence_dev,
+  d
+)
+
+summary(model_pers)
+# report::report_text(model_pers)
+```
+
+The experimental manipulation worked.
+
+```{r}
+model_anon <- lm(
+  per_anonymity ~ anonymity_dev,
+  d
+)
+summary(model_anon)
+# report::report_text(model_anon)
+```
+
+The experimental manipulation worked.
+
+# Bayesian mixed effects modeling
+
+We analyze the data using Bayesian modelling. 
+
+We use deviation/sum contrast coding (-.1, .1). Meaning, contrasts measure main effects of independent variables.
+
+## Fixed effects 
+
+We preregistered to analyze fixed effects. However, we did not explicate if we were to model zero inflation separately. Below hence two options.
+
+```{r fixed-effects-model-1}
+#| message: false
+
+fit_fe_1 <- 
+  brm(
+    op_expr ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic/group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 8000
+    , warmup = 2000
+    , family = zero_inflated_poisson()
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 12
+      )
+    , save_pars = save_pars(all = TRUE)
+    )
+```
+
+Only some convergence issues. Let's inspect model.
+
+```{r fixed-effects-model-1-insp}
+plot(fit_fe_1, ask = FALSE)
+```
+
+Looks quite good!
+
+Let's look at results.
+
+```{r fixed-effects-model-1-sum}
+summary(fit_fe_1)
+```
+
+No significant effect emerged.
+
+Let's inspect ICC
+
+```{r}
+var_ratio_fe <- performance::variance_decomposition(
+  fit_fe_1
+  , by_group = TRUE)
+var_ratio_fe
+```
+
+`r var_ratio_fe$ICC_decomposed * 100` percent of variance in opinion expressions explained by both topics and groups.
+
+Let's look at exponentiated results for interpretation.
+
+```{r fixed-effects-model-1-tab}
+broom.mixed::tidy(fit_fe_1) |> 
+  mutate(
+    estimate_exp = exp(estimate),
+    conf_low_exp = exp(conf.low),
+    conf_high_exp = exp(conf.high)
+    ) %>% 
+  mutate(
+    across(
+      c(
+        estimate
+        , conf.low
+        , conf.high
+        , estimate_exp
+        , conf_low_exp
+        , conf_high_exp
+        ),
+      ~ round(.x, 2)
+    )
+  ) %>% 
+  select(
+    -effect, -component, -group, -std.error
+  ) %>% 
+  rmarkdown::paged_table()
+```
+
+Again, of course no significant effect. Main effects appear trivial. Interaction effect somewhat larger. Let's visualize results to see what this exactly means.
+
+```{r fixed-effects-model-1-vis}
+p <- plot(
+  conditional_effects(
+    fit_fe_1
+    ), 
+  ask = FALSE,
+  plot = FALSE
+  )
+
+p_anon <- p[["anonymity_dev"]]
+p_int <- p[[3]]
+
+p_pers <- 
+  p[["persistence_dev"]] +
+  xlab("Persistence") +
+  ylab("Opinion expression") +
+  scale_x_discrete(
+    breaks = c(-0.5, .5),
+    labels = c("Low", "High")
+    ) +
+  scale_y_continuous(
+    limits = c(5, 15)
+  )
+
+p_anon <- 
+  p[["anonymity_dev"]] +
+  xlab("Anonymity") +
+  ylab("Opinion expression") +
+  scale_x_discrete(
+    breaks = c(-0.5, .5),
+    labels = c("Low", "High")
+    ) +
+  theme(
+    axis.title.y = element_blank()
+    ) +
+  scale_y_continuous(
+    limits = c(5, 15)
+  )
+
+p_int <- 
+  p[[3]] +
+  xlab("Persistence") +
+  ylab("Opinion expression") +
+  scale_x_discrete(
+    breaks = c(-0.5, .5),
+    labels = c("Low", "High")
+    ) +
+  scale_color_discrete(
+    labels = c("Low", "High")
+    ) +
+  guides(
+    fill = "none",
+    color = guide_legend(
+      title = "Anonymity"
+      )
+    ) +
+  theme(
+    axis.title.y = element_blank()
+    ) +
+  scale_y_continuous(
+    limits = c(5, 15)
+  )
+
+plot <- cowplot::plot_grid(
+  p_pers, p_anon, p_int, 
+  labels = c('A', 'B', "C"), 
+  nrow = 1,
+  rel_widths = c(2, 2, 3)
+  )
+
+plot
+ggsave("figures/results.png", plot, width = 8, height = 4)
+```
+
+Shows that there are no main effects. There seems to be a (nonsignificant) interaction effect. In high persistence environment, anonymity is conducive to communication; in low it's the opposite.
+
+Let's look at posteriors
+
+```{r fixed-effects-model-1-pos}
+p_1 <- 
+  pp_check(fit_fe_1) + 
+  labs(title = "Zero-inflated poisson")
+p_1
+```
+
+The actual distribution cannot be precisely reproduced, but it's also not too far off.
+
+## Random effects
+
+We said we'd explore random effects. Following the "keep it maximal" principle, it'd actually make sense to consider these analyses the best ones, as they can model how the experimental conditions affect the outcomes differentially depending on topic.
+
+Let's now model random effects.
+
+```{r random-effects-model-1}
+#| message: false
+
+fit_re_1 <- 
+  brm(
+    op_expr ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 + persistence_dev * anonymity_dev | topic) + 
+      (1 | topic:group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 8000
+    , warmup = 2000
+    , family = zero_inflated_poisson()
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 15
+      )
+    , save_pars = save_pars(all = TRUE)
+    )
+```
+
+Shows some problems, but not all that many.
+
+Let's inspect model.
+
+```{r random-effects-model-1-insp}
+plot(fit_re_1, ask = FALSE)
+```
+
+Traceplots look alright.
+
+Let's look at results.
+
+```{r random-effects-model-1-sum}
+summary(fit_re_1)
+```
+
+Again, virtually no main effect. Interaction effect larger, but also not even closely significant.
+Let's see if the random effects model fits better
+
+```{r}
+fit_fe_1 <- add_criterion(
+  fit_fe_1
+  , "kfold" 
+  , K = 10
+  # , moment_match = TRUE
+  )
+
+fit_re_1 <- add_criterion(
+  fit_re_1
+  , "kfold"
+  , K = 10
+  # , moment_match = TRUE
+  )
+
+comp_1 <- loo_compare(fit_fe_1, fit_re_1, criterion = "kfold")
+comp_1
+```
+
+Although model comparisons showed that the model with random effects fitted better, the difference was not significant (Δ ELPD = `r comp_1[2]`, 95% CI [`r comp_1[2] - comp_1[4] * 1.96`, `r comp_1[2] + comp_1[4] * 1.96`]. Hence, for reasons of parsimony the model with fixed effects is preferred.
+
+## Hurdle
+
+Let's now estimate a fixed effects model with hurdles. 
+
+```{r hrdl-model-1-fit}
+#| message: false
+fit_hrdl_1 <- 
+brm(
+  bf(
+    op_expr ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic) + 
+      (1 | topic:group),
+    zi ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic) + 
+      (1 | topic:group)
+  )
+  , data = d
+  , chains = 4
+  , cores = 4
+  , iter = 8000
+  , warmup = 2000
+  , family = zero_inflated_poisson()
+  , control = list(
+    adapt_delta = .95
+    , max_treedepth = 15
+    )
+  )
+```
+
+Estimation works quite well.
+
+Let's inspect model.
+
+```{r hrdl-model-1-insp}
+plot(fit_hrdl_1, ask = FALSE)
+```
+
+Trace-plots look alright.
+
+```{r hrdl-model-1-sum}
+summary(fit_hrdl_1)
+```
+
+Same results, no main effects, slightly larger but still nonsignificant interaction effect.
+
+Let's inspect coefficients individually.
+
+```{r}
+coefficients(fit_hrdl_1)
+```
+
+Let's look at exponentiated results for interpretation.
+
+```{r hrdl-model-1-tab}
+broom.mixed::tidy(fit_hrdl_1) |> 
+  mutate(
+    estimate_exp = exp(estimate),
+    conf_low_exp = exp(conf.low),
+    conf_high_exp = exp(conf.high),
+    estimate_zi = exp(estimate) / (1 + exp(estimate)),
+    conf_low_zi = exp(conf.low) / (1 + exp(conf.low)),
+    conf_high_zi = exp(conf.high) / (1 + exp(conf.high))
+    ) %>% 
+  mutate(
+    across(
+      c(
+        estimate
+        , conf.low
+        , conf.high
+        , estimate_exp
+        , conf_low_exp
+        , conf_high_exp
+        , estimate_zi 
+        , conf_low_zi 
+        , conf_high_zi
+        ),
+      ~ round(.x, 2)
+    )
+  ) %>% 
+  select(
+    -effect, -group, -std.error  # -component, 
+  ) %>% 
+  rmarkdown::paged_table()
+```
+
+Let's visualize results.
+
+```{r hrdl-model-1-plot}
+plot(
+  conditional_effects(
+    fit_hrdl_1
+    ), 
+  ask = FALSE
+  )
+```
+
+Similar picture. Effects appear even smaller.
+
+Let's look at posteriors
+
+```{r hrdl-model-1-pos}
+p_4 <- 
+  pp_check(fit_hrdl_1) + 
+  labs(title = "Zero-inflated poisson")
+p_4
+```
+
+# Exploratory Analyses
+## Frequentist
+
+Look at results from a frequentist perspective.
+
+### Fixed effects
+
+Estimate nested model.
+
+```{r frq-fixed-effects-model-1}
+#| message: false
+fit_fe_1_frq <- 
+  lmer(
+    op_expr ~ 
+      1 + 
+      (1 | topic/group) + 
+      persistence_dev * anonymity_dev
+    , data = d
+    )
+
+summary(fit_fe_1_frq)
+```
+
+Quite weird that topic doesn't get any variance at all. Perhaps due to small cluster size? With Bayesian estimation, it worked alright.
+
+Estimate without nesting.
+
+```{r frq-fixed-effects-model-2}
+#| message: false
+fit_fe_2_frq <- 
+  lmer(
+    op_expr ~ 
+      1 + 
+      (1 | topic) +
+      persistence_dev * anonymity_dev
+    , data = d
+    )
+
+summary(fit_fe_2_frq)
+```
+
+Estimate without hierarchical structure.
+
+```{r frq-fixed-effects-model-3}
+#| message: false
+fit_fe_3_frq <- 
+  lm(
+    op_expr ~ 
+      1 + 
+      persistence_dev * anonymity_dev + topic
+    , data = d
+    )
+
+summary(fit_fe_3_frq)
+```
+
+Also here, no significant effects.
+
+### Random effects
+
+Now do the same with random effects.
+
+```{r frq-random-effects-model-1}
+#| message: false
+fit_re_1_frq <- 
+  lmer(
+    op_expr ~ 
+      1 + 
+      persistence_dev * anonymity_dev + 
+      (1 + persistence_dev * anonymity_dev | topic) +
+      (1 | topic:group),
+    , data = d
+    )
+
+summary(fit_re_1_frq)
+```
+
+```{r frq-random-effects-model-2}
+#| message: false
+fit_re_2_frq <- 
+  lmer(
+    op_expr ~ 
+      1 + 
+      persistence_dev * anonymity_dev + 
+      (1 + persistence_dev * anonymity_dev | topic),
+    , data = d
+    )
+
+summary(fit_re_2_frq)
+```
+
+Let's inspect coefficients.
+
+```{r}
+coefficients(fit_re_2_frq)
+```
+
+## Gender
+
+Let's see if effects differ across genders
+
+```{r random-effects-model-1-gen}
+#| message: false
+
+fit_fe_gen_1 <- 
+  brm(
+    op_expr ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic/group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 8000
+    , warmup = 2000
+    , family = zero_inflated_poisson()
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 12
+      )
+    )
+```
+
+Shows some problems, but not all that many.
+
+Let's inspect model.
+
+```{r random-effects-model-1-gen-insp}
+plot(fit_fe_gen_1, ask = FALSE)
+```
+
+Traceplots look alright.
+
+Let's look at results.
+
+```{r random-effects-model-1-gen-sum}
+summary(fit_fe_gen_1)
+```
+
+## Benefits
+
+Let's see if benefits differ across experimental groups.
+
+We first look at the experimental group's descriptives
+
+```{r}
+d %>% 
+  group_by(persistence) %>% 
+  summarize(benefits_m = mean(benefits, na.rm = TRUE))
+```
+
+Looking at persistence, we see people with lower persistence reporting slightly higher benefits.
+
+```{r}
+d %>% 
+  group_by(anonymity) %>% 
+  summarize(benefits_m = mean(benefits, na.rm = TRUE))
+```
+
+Looking at anonymity, we see people with low anonymity reporting marginally higher benefits.
+
+```{r}
+d %>% 
+  group_by(persistence, anonymity) %>% 
+  summarize(benefits_m = mean(benefits, na.rm = T))
+```
+
+Looking at both groups combined, we see that low anonymity and low persistence yielded highest benefits.
+
+```{r random-effects-model-1-ben}
+#| message: false
+
+fit_fe_ben_1 <- 
+  brm(
+    benefits ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic/group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 8000
+    , warmup = 2000
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 12
+      )
+    )
+```
+
+Shows some problems, but not all that many.
+
+Let's inspect model.
+
+```{r random-effects-model-1-ben-insp}
+plot(fit_fe_ben_1, ask = FALSE)
+```
+
+Traceplots look alright.
+
+Let's look at results.
+
+```{r random-effects-model-1-ben-sum}
+summary(fit_fe_ben_1)
+```
+
+No significant effect. But note that effect of persistence on perceived benefits only marginally not significant.
+
+## Costs
+
+Let's see if perceived differed across experimental groups.
+
+We first look at the experimental group's descriptives
+
+```{r}
+d %>% 
+  group_by(persistence) %>% 
+  summarize(costs = mean(costs, na.rm = TRUE))
+```
+
+Looking at persistence, we see both groups report equal costs.
+
+```{r}
+d %>% 
+  group_by(anonymity) %>% 
+  summarize(costs = mean(costs, na.rm = TRUE))
+```
+
+Looking at anonymity, we see people with low anonymity report slightly higher costs.
+
+```{r}
+d %>% 
+  group_by(persistence, anonymity) %>% 
+  summarize(costs = mean(costs, na.rm = TRUE))
+```
+
+Looking at both groups combined, we see that highest costs were reported by group with low anonymity and low persistence.
+
+```{r random-effects-model-1-ris}
+#| message: false
+
+fit_fe_costs_1 <- 
+  brm(
+    costs ~ 
+      1 + persistence_dev * anonymity_dev +
+      (1 | topic/group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 20000
+    , warmup = 2000
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 12
+      )
+    )
+```
+
+Shows some problems, but not all that many.
+
+Let's inspect model.
+
+```{r random-effects-model-1-ris-insp}
+plot(fit_fe_costs_1, ask = FALSE)
+```
+
+Traceplots look alright.
+
+Let's look at results.
+
+```{r random-effects-model-1-ris-sum}
+summary(fit_fe_costs_1)
+```
+
+We find that anonymity does reduce costs.
+
+## Mediation
+
+Let's see if perceived benefits and costs were associated with increased opinion expressions.
+
+```{r fixed-effects-model-med}
+fit_fe_med <- 
+  brm(
+    op_expr ~ 
+      1 + persistence_dev * anonymity_dev + benefits + costs +
+      (1 | topic/group)
+    , data = d
+    , chains = 4
+    , cores = 4
+    , iter = 8000
+    , warmup = 2000
+    , family = zero_inflated_poisson()
+    , control = list(
+      adapt_delta = .95
+      , max_treedepth = 12
+      )
+    )
+```
+
+Let's look at results.
+
+```{r fixed-effects-model-med-sum}
+summary(fit_fe_med)
+```
+
+We find that increased perceived costs are associated with decreased opinion expressions. Increased benefits are associated with increased opinion expressions. Let's check if overall effect is significant.
+
+```{r}
+anon_costs_a_b <- fixef(fit_fe_costs_1)["anonymity_dev1", "Estimate"]
+anon_costs_a_se <- fixef(fit_fe_costs_1)["anonymity_dev1", "Est.Error"]
+anon_costs_a_dis <- rnorm(10000, anon_costs_a_b, anon_costs_a_se)
+
+anon_costs_b_b <- fixef(fit_fe_med)["benefits", "Estimate"]
+anon_costs_b_se <- fixef(fit_fe_med)["benefits", "Est.Error"]
+anon_costs_b_dis <- rnorm(10000, anon_costs_b_b, anon_costs_b_se)
+
+anon_costs_ab_dis <- anon_costs_a_dis * anon_costs_b_dis
+anon_costs_ab_m <- median(anon_costs_ab_dis)
+anon_costs_ab_ll <- quantile(anon_costs_ab_dis, .025)
+anon_costs_ab_ul <- quantile(anon_costs_ab_dis, .975)
+```
+
+The effect is significant (_b_ = `r anon_costs_ab_m`, 95% MC CI [`r anon_costs_ab_ll`, `r anon_costs_ab_ul`]).
+
+# Save
+
+```{r}
+save.image("data/image.RData")
+```
+

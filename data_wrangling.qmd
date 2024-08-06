@@ -1,0 +1,420 @@
+---
+title: "data_wrangling"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+---
+
+```{r}
+#| message: false
+#| result: hide
+library(readxl)
+library(tidyverse)
+library(sjlabelled)
+```
+
+# Data Input
+
+The working directory is set to the location of the data files. All files in this directory are read and merged into one dataset.
+
+```{r}
+files <- list.files("data/raw/")
+length(files) # 48
+ 
+# read in first dataset
+dat_raw <- read_excel(paste0("data/raw/", files[1]))
+
+# read in and merge remaining datasets
+for(file in 1:length(files)){ 
+  d <- read_excel(paste0("data/raw/", files[file]))
+  dat_raw <- rbind(d, dat_raw)
+}
+
+nrow(dat_raw)
+head(dat_raw)
+```
+
+# Remove and Mark Edited Messages
+
+The following approach searches for identical timestamps across all tables. It is unlikely that two people would have written at the exact same time down to the millisecond.
+
+generate new variable which indicates if messages have been edited
+
+```{r}
+dat_raw$edit <- 0 
+```
+
+Find all timestamps which occur more than once but excludes the last occurrence
+
+```{r}
+dat_disc <- 
+  dat_raw %>% 
+  arrange(timestamp)
+
+dat_disc <-
+  dat_disc %>% 
+  mutate(duplicat = duplicated(timestamp, fromLast = TRUE))
+
+table(dat_disc$duplicat)
+
+duplicats <- which(duplicated(dat_disc$timestamp, fromLast = TRUE))
+```
+
+Overall, there are 874 duplicates, which seems high. Let's inspect.
+
+```{r}
+dat_disc[c(duplicats[1], duplicats[1] +1), ]
+```
+
+Shows that these are edited messages.
+
+Mark all messages with timestamps which occur more than once as edited
+
+```{r}
+dat_disc[dat_disc$timestamp %in% dat_disc$timestamp[duplicated(dat_disc$timestamp)], ]$edit <- 1
+```
+
+Let's inspect
+
+```{r}
+dat_disc[dat_disc$edit == 1, ]$message %>% 
+  head()
+```
+
+Seems correct but not all messages seem edited; some messages might be erroneously saved twice
+
+```{r}
+dat_disc <- dat_disc[-which(duplicated(dat_disc$timestamp, fromLast = TRUE)), ]
+```
+
+Check for remaining duplicated timestamps
+
+```{r}
+which(duplicated(dat_disc$timestamp))
+```
+
+```{r}
+table(dat_disc$edit)
+```
+
+769 edited messages
+
+```{r}
+nrow(dat_disc)
+```
+
+# Add Condition / Topic Variables
+
+Exclude all moderator/admin messages.
+
+```{r}
+dat_disc <- dat_disc[-grep("moderator", dat_disc$role), ]
+dat_disc <- dat_disc[-grep("admin", dat_disc$role), ]
+
+nrow(dat_disc)
+```
+
+### Anonymity
+
+Anonymity levels are assigned based on the role names.
+
+```{r}
+dat_disc$anonymity <- NA
+dat_disc$anonymity <- ifelse(grepl("vogel|reh|fisch|otter|biene|hamster", dat_disc$role, ignore.case = TRUE), 0, 
+                          ifelse(grepl("maus|katze|frosch|hund|hase|iltis", dat_disc$role, ignore.case = TRUE), 1, NA)) %>% 
+  as.integer()
+
+table(dat_disc$anonymity)
+dat_disc[is.na(dat_disc$anonymity), ] # should be empty
+```
+
+### Persistence
+
+Persistence levels are assigned based on the role names.
+
+```{r}
+dat_disc$persistence <- NA
+dat_disc$persistence <- ifelse(grepl("reh|katze|otter|hund|hamster|iltis", dat_disc$role, ignore.case = TRUE), 0, 
+                            ifelse(grepl("vogel|maus|fisch|frosch|biene|hase", dat_disc$role, ignore.case = TRUE), 1, NA)) %>% 
+  as.integer()
+
+table(dat_disc$persistence)
+dat_disc[is.na(dat_disc$persistence), ] # should be empty
+```
+
+### Topic
+
+Topics are assigned based on the role names.
+
+```{r}
+dat_disc$topic <- NA 
+dat_disc$topic <- ifelse(
+  grepl("vogel|reh|maus|katze", dat_disc$role, ignore.case = TRUE), "gender",
+    ifelse(grepl("fisch|otter|frosch|hund", dat_disc$role, ignore.case = TRUE), "climate",
+      ifelse(grepl("biene|hamster|hase|iltis", dat_disc$role, ignore.case = TRUE), "migration", "other")
+      )
+  )
+
+table(dat_disc$topic)
+dat_disc$topic <- as.factor(dat_disc$topic)
+dat_disc[dat_disc$topic == "other", ] # should be empty
+```
+
+Check if matched correctly:
+
+```{r}
+table(dat_disc[dat_disc$anonymity == "high" & dat_disc$persistence == "low", ]$category)
+table(dat_disc[dat_disc$anonymity == "low" & dat_disc$persistence == "high", ]$category)
+table(dat_disc[dat_disc$anonymity == "high" & dat_disc$persistence == "high", ]$category)
+table(dat_disc[dat_disc$anonymity == "low" & dat_disc$persistence == "low", ]$category)
+```
+
+All correct.
+
+Write dataset containing all discord data without duplicated messages and with variables indicating factor levels // topic
+
+```{r}
+write.csv(dat_disc, file = "DiscordData_AllGroups.csv")
+```
+
+# Merge with Survey Datasets
+## Load data
+
+```{r}
+#### read in T1 data ####
+dat_T1 <- read.csv("data/data_T1_Fragebogen.csv", header = TRUE, sep = ";")
+nrow(dat_T1)
+
+# use only participants who finished T1
+dat_T1 <- 
+  dat_T1 %>% 
+  filter(
+    FINISHED == 1
+  )
+nrow(dat_T1)
+
+# indicate which variables are from T1 Questionnaire
+colnames(dat_T1) <- paste(colnames(dat_T1), "T1", sep = "_") 
+
+#### read in T2 data ####
+dat_T2 <- read.csv("data/data_T2_Fragebogen.csv", header = TRUE, sep = ";")
+nrow(dat_T2)
+
+# indicate which variables are from T2 Questionnaire
+colnames(dat_T2) <- paste(colnames(dat_T2), "T2", sep = "_") 
+```
+
+## Merge Discord Dataset with T1 Data
+
+Merges data such that discord data get respective case from T1
+However, doing so makes us lose everyone who didn't actively comment online
+
+
+```{r}
+dat_merged_T1 <- right_join(
+  dat_disc, 
+  dat_T1, 
+  by = c("case" = "CASE_T1")
+ , keep = TRUE
+  )
+
+nrow(dat_merged_T1)
+ncol(dat_merged_T1)
+head(dat_merged_T1)
+```
+
+## Merge T1 Data with Discord data
+
+Now we merge such that everyone who participated in T1 will be maintained
+
+```{r}
+dat_T1_disc <- left_join(
+  dat_T1, 
+  dat_disc, 
+  by = c("CASE_T1" = "case"), 
+  keep = TRUE
+  )
+```
+
+## Merge T2 Data to Discord / T1 Dataset
+
+```{r}
+dat_T2 <- dat_T2[dat_T2$FINISHED_T2 == 1, ]
+length(which(table(dat_T2$IV01_RV1_T2) >= 2))
+```
+
+25 people have multiple complete datasets in the T2 survey
+keep the first version
+
+```{r}
+dat_T2$IV01_RV1_T2 <- as.integer(dat_T2$IV01_RV1_T2)
+dat_merged_T1T2 <- left_join(dat_merged_T1, dat_T2, by = c("case" = "IV01_RV1_T2"), 
+                             relationship = "many-to-one", multiple = "first", 
+                             keep = TRUE)
+```
+
+IV01_RV1_T2 contains the case numbers in the T2 dataset. 
+Individuals not in T2 receive NA. 
+
+```{r}
+nrow(dat_disc)
+nrow(dat_merged_T1T2) 
+
+ncol(dat_merged_T1T2)
+ncol(dat_disc) + ncol(dat_T1) + ncol(dat_T2)
+
+write.csv(dat_merged_T1T2, "data/Data_Discord_T1T2.csv", row.names = FALSE)
+
+length(unique(dat_merged_T1T2$case))
+```
+
+773 people wrote something on Discord
+
+```{r}
+length(unique(dat_merged_T1T2$CASE_T1))
+```
+
+All Discord users filled T1
+ 
+```{r}
+length(unique(dat_merged_T1T2$IV01_RV1_T2))
+```
+
+657 Discord users filled T2
+ 
+960 - 773 = 187 people filled T1 and were on Discord but didn't write a message.
+If you need all T1 participants on Discord, check Discord lists.
+Only users who wrote at least one message are in Discord datasets.
+
+# Wrangling
+
+Change values so that people who didn't write comments get zeros for opinion expressions.
+
+```{r}
+dat_merged_T1T2 <- 
+  dat_merged_T1T2 %>% 
+  mutate(
+    op_expr_nuan = replace_na(EM, 0),
+    op_expr = if_else(op_expr_nuan == 2, 1, op_expr_nuan),
+    op_expr = replace_na(op_expr, 0),
+    op_val = replace_na(VM, 0),
+    persistence_dev = persistence - .5,
+    anonymity_dev = anonymity - .5,
+    group = QUESTNNR_T1,
+    id = CASE_T1
+  )
+```
+
+Find out what code leads to what experimental condition
+
+```{r}
+dat_merged_T1 %>% 
+  group_by(QUESTNNR_T1) %>% 
+  reframe(anon = sum(anonymity, na.rm = TRUE))
+
+grps_anonymous <- c(
+  "03_Tokio",
+  "04_Dubai",
+  "07_Oslo",
+  "08_Rio",
+  "11_Florenz",
+  "12_Sydney"
+)
+
+dat_merged_T1 %>% 
+  group_by(QUESTNNR_T1) %>% 
+  reframe(persistent = sum(persistence, na.rm = TRUE))
+
+grps_persistent <- c(
+  "01_Rom",
+  "03_Tokio",
+  "05_Madrid",
+  "07_Oslo",
+  "09_Berlin",
+  "11_Florenz"
+)
+
+dat_merged_T1 %>% 
+  group_by(QUESTNNR_T1) %>% 
+  summarize(topic = sum(topic == "climate", na.rm = TRUE))
+
+grps_topic_climate <- c(
+  "05_Madrid",
+  "06_Prag",
+  "07_Oslo",
+  "08_Rio"
+  )
+
+dat_merged_T1 %>% 
+  group_by(QUESTNNR_T1) %>% 
+  summarize(topic = sum(topic == "gender", na.rm = TRUE))
+
+grps_topic_gender <- c(
+  "01_Rom",
+  "02_London",
+  "03_Tokio",
+  "04_Dubai"
+)
+
+dat_merged_T1 %>% 
+  group_by(QUESTNNR_T1) %>% 
+  summarize(topic = sum(topic == "migration", na.rm = TRUE))
+
+grps_topic_migration = c(
+  "09_Berlin",
+  "10_Paris",
+  "11_Florenz",
+  "12_Sydney"
+)
+```
+
+Make new variable with experimental conditions
+
+```{r}
+dat_merged_T1T2 <- dat_merged_T1T2 %>% 
+  mutate(
+    persistence_new = case_match(
+      QUESTNNR_T1,
+      grps_persistent ~ 1,
+      .default = 0
+    ),
+    anonymity_new = case_match(
+      QUESTNNR_T1,
+      grps_anonymous ~ 1,
+      .default = 0
+    ),
+    topic_new = case_match(
+      QUESTNNR_T1,
+      grps_topic_climate ~ "climate",
+      grps_topic_gender ~ "gender",
+      grps_topic_migration ~ "migration"
+    )
+  )
+  
+```
+
+Now count opinion expressions for each participants. Maintain information on experimental settings.
+
+```{r}
+d <- 
+  dat_merged_T1T2 %>% 
+  group_by(CASE_T1) %>% 
+  summarize(
+    op_expr = sum(op_expr)
+    , persistence_dev = persistence_dev[1]
+    , persistence_new = persistence_new[1]
+    , anonymity_dev = anonymity_dev[1]
+    , anonymity_new = anonymity_new[1]
+    , topic = topic[1]
+    , topic_new = topic_new[1]
+    , group = role[1]
+  ) %>% 
+  ungroup()
+```
+
+
+```{r}
+save(d, file = "data/data.RData")
+```
+
