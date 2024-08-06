@@ -4,10 +4,16 @@ navbar:
   title: "Home"
   type: inverse
   left:
+    - text: "Analyses"
+      href: analyses.html
+    - text: "Data Preparation"
+      href: data_wrangling.html
     - text: "Power Analysis"
       href: power_analysis.html
     - text: "Planned Analysis"
       href: analysis_preregistered.html
+    - text: "Deviations"
+      href: deviations.html
   right:
     - text: "Source Code"
       icon: fa-lg fa-github

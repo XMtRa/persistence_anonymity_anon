@@ -13,7 +13,7 @@
 
 <title>Planned analyses</title>
 
-<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.27/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
@@ -29,14 +29,14 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -363,7 +363,7 @@ cannot preregister the exact model we will ultimately run. But the
 general approach will be as follows.</p>
 <div id="load-data" class="section level1">
 <h1>Load data</h1>
-<pre class="r"><code>d &lt;- read.csv(&quot;data_simulated.csv&quot;)</code></pre>
+<pre class="r"><code>d &lt;- read.csv(&quot;data/data_simulated.csv&quot;)</code></pre>
 </div>
 <div id="data-wrangling" class="section level1">
 <h1>Data wrangling</h1>
@@ -404,9 +404,21 @@ d[sample(c(1:nrow(d)), 30), ]$expressions &lt;- NA</code></pre>
     refresh = 0,  
     chains = 2,
     family = zero_inflated_poisson(&quot;log&quot;)
-    )
-
-summary(fit_fe)</code></pre>
+    )</code></pre>
+<pre><code>## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## using C compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
+## using SDK: ‘MacOSX14.4.sdk’
+## clang -arch arm64 -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include &#39;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
+## /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: &#39;cmath&#39; file not found
+## #include &lt;cmath&gt;
+##          ^~~~~~~
+## 1 error generated.
+## make: *** [foo.o] Error 1</code></pre>
+<pre class="r"><code>summary(fit_fe)</code></pre>
 <pre><code>##  Family: zero_inflated_poisson 
 ##   Links: mu = log; zi = identity 
 ## Formula: expressions ~ 1 + persistence * anonymity + (1 | topic) + (1 | group) 
@@ -414,30 +426,30 @@ summary(fit_fe)</code></pre>
 ##   Draws: 200 chains, each with iter = 2000; warmup = 1000; thin = 1;
 ##          total post-warmup draws = 200000
 ## 
-## Group-Level Effects: 
+## Multilevel Hyperparameters:
 ## ~group (Number of levels: 48) 
 ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-## sd(Intercept)     0.03      0.02     0.00     0.09 1.03     4258     6005
+## sd(Intercept)     0.03      0.02     0.00     0.08 1.01    17434    53849
 ## 
 ## ~topic (Number of levels: 3) 
 ##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-## sd(Intercept)     0.10      0.18     0.00     0.51 1.09     1378      483
+## sd(Intercept)     0.08      0.12     0.00     0.46 1.04     2745      924
 ## 
-## Population-Level Effects: 
+## Regression Coefficients:
 ##                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-## Intercept                 0.81      0.09     0.61     0.98 1.11     1056
-## persistence              -0.10      0.05    -0.19    -0.01 1.05     2387
-## anonymity                 0.12      0.05     0.03     0.21 1.02     6012
-## persistence:anonymity     0.12      0.09    -0.07     0.31 1.04     3042
+## Intercept                 0.81      0.08     0.66     0.97 1.07     1655
+## persistence              -0.10      0.05    -0.19    -0.01 1.01     8941
+## anonymity                 0.12      0.05     0.03     0.21 1.01     8891
+## persistence:anonymity     0.13      0.09    -0.06     0.31 1.01     8432
 ##                       Tail_ESS
-## Intercept                  557
-## persistence               1388
-## anonymity                26128
-## persistence:anonymity     2259
+## Intercept                 1128
+## persistence              37367
+## anonymity                59711
+## persistence:anonymity    28623
 ## 
-## Family Specific Parameters: 
+## Further Distributional Parameters:
 ##    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-## zi     0.03      0.01     0.01     0.06 1.03     4088     7563
+## zi     0.03      0.01     0.01     0.06 1.02     4874     3452
 ## 
 ## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 ## and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -455,9 +467,21 @@ summary(fit_fe)</code></pre>
     refresh = 0, 
     chains = 2,
     family = zero_inflated_poisson(&quot;log&quot;)
-    )
-
-summary(fit_re)</code></pre>
+    )</code></pre>
+<pre><code>## Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
+## using C compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
+## using SDK: ‘MacOSX14.4.sdk’
+## clang -arch arm64 -I&quot;/Library/Frameworks/R.framework/Resources/include&quot; -DNDEBUG   -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include&quot; -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/&quot;  -I&quot;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include&quot; -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include &#39;/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp&#39;  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
+## In file included from &lt;built-in&gt;:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
+## In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
+## /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: &#39;cmath&#39; file not found
+## #include &lt;cmath&gt;
+##          ^~~~~~~
+## 1 error generated.
+## make: *** [foo.o] Error 1</code></pre>
+<pre class="r"><code>summary(fit_re)</code></pre>
 <pre><code>##  Family: zero_inflated_poisson 
 ##   Links: mu = log; zi = identity 
 ## Formula: expressions ~ 1 + persistence * anonymity + (1 + persistence * anonymity | topic) + (1 + persistence * anonymity | group) 
@@ -465,70 +489,70 @@ summary(fit_re)</code></pre>
 ##   Draws: 200 chains, each with iter = 2000; warmup = 1000; thin = 1;
 ##          total post-warmup draws = 200000
 ## 
-## Group-Level Effects: 
+## Multilevel Hyperparameters:
 ## ~group (Number of levels: 48) 
 ##                                        Estimate Est.Error l-95% CI u-95% CI
 ## sd(Intercept)                              0.03      0.02     0.00     0.09
 ## sd(persistence)                            0.06      0.05     0.00     0.18
 ## sd(anonymity)                              0.06      0.05     0.00     0.18
-## sd(persistence:anonymity)                  0.13      0.10     0.00     0.35
-## cor(Intercept,persistence)                -0.02      0.45    -0.82     0.80
-## cor(Intercept,anonymity)                  -0.02      0.45    -0.82     0.81
+## sd(persistence:anonymity)                  0.13      0.10     0.00     0.36
+## cor(Intercept,persistence)                -0.03      0.45    -0.82     0.80
+## cor(Intercept,anonymity)                  -0.02      0.45    -0.83     0.80
 ## cor(persistence,anonymity)                 0.03      0.45    -0.80     0.82
-## cor(Intercept,persistence:anonymity)       0.03      0.45    -0.81     0.83
-## cor(persistence,persistence:anonymity)    -0.01      0.45    -0.82     0.80
-## cor(anonymity,persistence:anonymity)      -0.03      0.45    -0.82     0.80
+## cor(Intercept,persistence:anonymity)       0.03      0.45    -0.80     0.83
+## cor(persistence,persistence:anonymity)    -0.02      0.45    -0.82     0.81
+## cor(anonymity,persistence:anonymity)      -0.02      0.45    -0.82     0.80
 ##                                        Rhat Bulk_ESS Tail_ESS
-## sd(Intercept)                          1.01    10176     6748
-## sd(persistence)                        1.01    14796    35021
-## sd(anonymity)                          1.01    12709    25619
-## sd(persistence:anonymity)              1.01    24987    17569
-## cor(Intercept,persistence)             1.01    10668    33939
-## cor(Intercept,anonymity)               1.01     8056    11459
-## cor(persistence,anonymity)             1.01    21392    26840
-## cor(Intercept,persistence:anonymity)   1.02     6799     2731
-## cor(persistence,persistence:anonymity) 1.01    16537    14354
-## cor(anonymity,persistence:anonymity)   1.01    16826    38828
+## sd(Intercept)                          1.01    30498    22262
+## sd(persistence)                        1.00    48431    63936
+## sd(anonymity)                          1.01    15705    13221
+## sd(persistence:anonymity)              1.01    10178     6521
+## cor(Intercept,persistence)             1.01    50963    35279
+## cor(Intercept,anonymity)               1.01    10997     4004
+## cor(persistence,anonymity)             1.00    62763    56409
+## cor(Intercept,persistence:anonymity)   1.00    42269    60115
+## cor(persistence,persistence:anonymity) 1.01    30295    73540
+## cor(anonymity,persistence:anonymity)   1.01    21876    69623
 ## 
 ## ~topic (Number of levels: 3) 
 ##                                        Estimate Est.Error l-95% CI u-95% CI
-## sd(Intercept)                              0.12      0.19     0.00     0.69
-## sd(persistence)                            0.30      0.40     0.01     1.48
-## sd(anonymity)                              0.25      0.32     0.01     1.24
-## sd(persistence:anonymity)                  0.41      0.52     0.01     1.92
-## cor(Intercept,persistence)                -0.02      0.47    -0.85     0.82
-## cor(Intercept,anonymity)                   0.02      0.47    -0.85     0.85
-## cor(persistence,anonymity)                -0.05      0.47    -0.85     0.81
-## cor(Intercept,persistence:anonymity)       0.02      0.47    -0.83     0.84
-## cor(persistence,persistence:anonymity)    -0.03      0.47    -0.85     0.82
-## cor(anonymity,persistence:anonymity)       0.03      0.46    -0.82     0.84
+## sd(Intercept)                              0.12      0.17     0.00     0.64
+## sd(persistence)                            0.28      0.34     0.01     1.28
+## sd(anonymity)                              0.25      0.32     0.01     1.18
+## sd(persistence:anonymity)                  0.40      0.50     0.01     1.87
+## cor(Intercept,persistence)                -0.03      0.47    -0.84     0.82
+## cor(Intercept,anonymity)                   0.02      0.47    -0.83     0.85
+## cor(persistence,anonymity)                -0.05      0.46    -0.86     0.82
+## cor(Intercept,persistence:anonymity)       0.02      0.46    -0.83     0.84
+## cor(persistence,persistence:anonymity)    -0.03      0.46    -0.84     0.82
+## cor(anonymity,persistence:anonymity)       0.02      0.46    -0.82     0.84
 ##                                        Rhat Bulk_ESS Tail_ESS
-## sd(Intercept)                          1.04     3124     1290
-## sd(persistence)                        1.04     3070     1164
-## sd(anonymity)                          1.02     5220     3340
-## sd(persistence:anonymity)              1.02     7313     2827
-## cor(Intercept,persistence)             1.01     8452     3828
-## cor(Intercept,anonymity)               1.04     3173     1841
-## cor(persistence,anonymity)             1.02     7732     7564
-## cor(Intercept,persistence:anonymity)   1.01     8512    10112
-## cor(persistence,persistence:anonymity) 1.02     7849    22289
-## cor(anonymity,persistence:anonymity)   1.01    14485    35072
+## sd(Intercept)                          1.02     8353     2840
+## sd(persistence)                        1.02     6855     2664
+## sd(anonymity)                          1.01     9196     3439
+## sd(persistence:anonymity)              1.02     9187     7182
+## cor(Intercept,persistence)             1.01    20993    56190
+## cor(Intercept,anonymity)               1.01    14624     6647
+## cor(persistence,anonymity)             1.01    22094    18190
+## cor(Intercept,persistence:anonymity)   1.00    50244    71238
+## cor(persistence,persistence:anonymity) 1.01    14783    35239
+## cor(anonymity,persistence:anonymity)   1.01    34864    40821
 ## 
-## Population-Level Effects: 
+## Regression Coefficients:
 ##                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-## Intercept                 0.81      0.10     0.58     1.02 1.05     2513
-## persistence              -0.10      0.23    -0.65     0.38 1.05     2312
-## anonymity                 0.12      0.19    -0.30     0.55 1.03     4335
-## persistence:anonymity     0.11      0.33    -0.63     0.79 1.02     4963
+## Intercept                 0.81      0.10     0.60     1.02 1.03     3534
+## persistence              -0.10      0.21    -0.60     0.34 1.03     4376
+## anonymity                 0.12      0.20    -0.31     0.56 1.02     5889
+## persistence:anonymity     0.12      0.33    -0.59     0.84 1.02     8115
 ##                       Tail_ESS
-## Intercept                 1209
-## persistence               1051
-## anonymity                 3302
-## persistence:anonymity     5606
+## Intercept                 2553
+## persistence               1755
+## anonymity                 2891
+## persistence:anonymity     7981
 ## 
-## Family Specific Parameters: 
+## Further Distributional Parameters:
 ##    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-## zi     0.03      0.01     0.01     0.06 1.02     6216    21221
+## zi     0.03      0.01     0.01     0.06 1.01     8739    53150
 ## 
 ## Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 ## and Tail_ESS are effective sample size measures, and Rhat is the potential

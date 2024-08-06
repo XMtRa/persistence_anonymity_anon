@@ -288,7 +288,7 @@ Let's create a single data-set and analyze it.
 
 ```{r}
 d <- sim_d(d_frame, seed = 1, effects_est, sd_est, groupsize_n)
-write.csv(d, "data_simulated.csv") # save data.
+write.csv(d, "data/data_simulated.csv") # save data.
 ```
 
 ## Analyse data

@@ -28,7 +28,7 @@ In what follows, we outline how we plan to analyze the data. Please note that de
 # Load data
 
 ```{r load-data}
-d <- read.csv("data_simulated.csv")
+d <- read.csv("data/data_simulated.csv")
 ```
 
 # Data wrangling
