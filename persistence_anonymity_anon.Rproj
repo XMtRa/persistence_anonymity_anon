@@ -13,3 +13,4 @@ RnwWeave: Sweave
 LaTeX: pdfLaTeX
 
 BuildType: Website
+WebsitePath: /Users/dienlin/Academia/Projekte/2020 Persistence and anonymity/Github anon/_site

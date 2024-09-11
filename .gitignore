@@ -13,3 +13,5 @@ analyses_words*
 data/
 !data/data.csv
 !data/data_simulated.csv
+/.quarto/
+lyses.html

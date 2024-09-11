@@ -1,0 +1,6 @@
+---
+title: "Deviations from Preregistration"
+---
+
+- We decided to not exclude people who missed the questionnaire at T2, as participation wasn’t necessary for our analyses and would have only led to unnecessary dropouts.
+- We originally planned to use default (flat) priors (chains = 2, iterations = 2,000, warm-up = 1,000). However, to improve convergence, we increased chains, iterations, and warm-ups.
