@@ -3,6 +3,7 @@ project:
   
 website:
   title: "Effects of persistence and anonymity on political opinion expression"
+  site-path: "/docs"
   navbar:
     title: "Home"
     type: inverse
