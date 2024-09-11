@@ -22,7 +22,10 @@ website:
         href: deviations.qmd
     right:
       - text: "Source Code"
-        icon: fa-lg fa-github
+        icon: fa-github
+        href: https://github.com/XMtRa/privacy_calc_exp_anon
+      - text: "Data"
+        icon: fa-database
         href: https://github.com/XMtRa/privacy_calc_exp_anon
 
 format:

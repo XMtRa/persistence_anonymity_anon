@@ -9,7 +9,8 @@ analysis_preregistered_cache/
 site_libs/.DS_Store
 analyses_cache/
 *_cache/
-data/
+data/*
+!data/
 !data/data.csv
 !data/data_simulated.csv
 /.quarto/
