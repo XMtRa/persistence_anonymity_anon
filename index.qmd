@@ -9,8 +9,8 @@ You can find the following information here:
 
 - [Statistical analyses](analyses.html)
 - [Statistical analyses with words as outcome](analyses_words_new.html)
-- [Power analyses](power_analysis.html)
-- [Planned analyses](analysis_preregistered.html)
+- [Power analyses](power_analyses.html)
+- [Planned analydocs](planned_analyses.html)
 - [Data preparation](data-wrangling.html)
 - [Deviations from preregistration](deviations.html)
 
