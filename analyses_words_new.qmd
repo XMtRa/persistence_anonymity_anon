@@ -1,5 +1,5 @@
 ---
-title: "Analyses with words as outcome"
+title: "Additional analyses"
 format: 
   html:
     self-contained: true
@@ -8,6 +8,8 @@ format:
 execute:
   cache: true
 ---
+
+As preregistered, below we report additional analyses for which we used the actual number of communicated words as DV.
 
 # Set-up
 ## Packages

@@ -184,6 +184,59 @@ d |>
 
 Looking at topics specifically, we also see that there's some variance.
 
+## Opinion expressions
+
+Let's look at the distribution of communicated number of words.
+
+```{r}
+ggplot(d, aes(op_expr)) +
+  geom_histogram(bins = 50)
+```
+
+Let's also look at how many did not express any opinions at all.
+
+Number: 
+
+```{r}
+length(which(d$op_expr == 0))
+```
+
+Percentage:
+
+```{r}
+length(which(d$op_expr == 0)) / length(d$op_expr)
+```
+
+Stats:
+
+```{r}
+summary(d$op_expr)
+```
+
+
+## Communicated words
+
+Let's look at the distribution of communicated number of words.
+
+```{r}
+ggplot(d, aes(n_Words)) +
+  geom_histogram(bins = 50)
+```
+
+Let's also look at how many did not write any words at all.
+
+```{r}
+length(which(d$n_Words == 0))
+```
+
+Everyone wrote at least one word.
+
+Stats:
+
+```{r}
+summary(d$n_Words)
+```
+
 # Manipulation Check
 
 Let's see if respondents indeed perceived the experimental manipulations. Let's first look at descriptives.
@@ -232,6 +285,56 @@ summary(model_anon)
 ```
 
 The experimental manipulation worked.
+
+## Cross contamination
+
+Let's look at cross contamination, i.e. if anonymity affected perceived persistence and if persistence affects perceived anonymity.
+
+```{r} 
+d |> 
+  group_by(anonymity) |> 
+  summarize(
+    "Perceived persistence" = mean(per_persistence, na.rm = TRUE)
+    ) |> 
+  as.data.frame() |> 
+  kable()
+```
+
+There was next to no difference among groups.
+
+```{r}
+model_pers <- lm(
+  per_persistence ~ anonymity_dev,
+  d
+)
+
+summary(model_pers)
+```
+
+The difference was not statistically significant. No cross contamination re. anonymity.
+
+```{r}
+d |> 
+  group_by(persistence) |> 
+  summarize(
+    "Perceived anonymity" = mean(per_anonymity, na.rm = TRUE)
+    ) |> 
+  as.data.frame() |> 
+  kable()
+```
+
+There was next to no difference in the groups' means.
+
+```{r}
+model_anon <- lm(
+  per_anonymity ~ persistence_dev,
+  d
+)
+summary(model_anon)
+```
+
+Again, no significant difference. In conclusion, no cross-contamination.
+
 
 # Random Allocation
 
@@ -488,6 +591,52 @@ comp_1
 
 Although model comparisons showed that the model with random effects fitted better, the difference was not significant (Δ ELPD = `r comp_1[2] |> round(2)`, 95% CI [`r comp_1[2] - comp_1[4] * 1.96 |> round(2)`, `r comp_1[2] + comp_1[4] * 1.96 |> round(2)`]. Hence, for reasons of parsimony the model with fixed effects is preferred.
 
+## Null-Model
+
+Let's also inspect a model without random intercepts to see if including random intercepts is worthwhile.
+
+```{r}
+fit_nm_1 <- 
+  hush(
+    brm(
+      op_expr ~ 
+        1 + persistence_dev * anonymity_dev + age + female + pol_stance
+      , data = d
+      , chains = 4
+      , cores = 4
+      , iter = 6000
+      , warmup = 2000
+      , family = zero_inflated_poisson()
+      , control = list(
+        adapt_delta = .95
+        , max_treedepth = 12
+        )
+      , save_pars = save_pars(all = TRUE)
+      , silent = 2
+      )
+  )
+
+summary(fit_nm_1)
+```
+
+Shows significant effect of anonymity on opinion expression.
+
+Let's compare models.
+
+```{r}
+fit_nm_1 <- add_criterion(
+  fit_nm_1
+  , "kfold"
+  , K = 10
+  , cores = 4
+  )
+
+comp_2 <- loo_compare(fit_fe_1, fit_nm_1, criterion = "kfold")
+comp_2
+```
+
+The model comparisons showed that the model with random intercepts fitted significantly better than the null model with fixed intercepts (Δ ELPD = `r comp_2[2] |> round(2)`, 95% CI [`r comp_2[2] - comp_2[4] * 1.96 |> round(2)`, `r comp_2[2] + comp_2[4] * 1.96 |> round(2)`]. 
+
 ## Hurdle
 
 Let's now estimate a fixed effects model with hurdles. 
@@ -522,7 +671,7 @@ fit_hrdl_1 <-
   )
 ```
 
-Agian, some warnings.
+Again, some warnings.
 
 Let's inspect model.
 
@@ -536,7 +685,7 @@ Trace-plots look alright.
 summary(fit_hrdl_1)
 ```
 
-Same results, no main effects, slightly larger but still nonsignificant interaction effect.
+Same results, no main effects, slightly larger but still non-significant interaction effect.
 
 # Exploratory Analyses
 ## Frequentist
