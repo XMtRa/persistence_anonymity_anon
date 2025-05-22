@@ -11,7 +11,6 @@ You can find the following information here:
 - [Statistical analyses with words as outcome](analyses_words_new.html)
 - [Power analyses](power_analyses.html)
 - [Planned analyses](planned_analyses.html)
-- [Data preparation](data_wrangling.html)
 - [Deviations from preregistration](deviations.html)
 
 This website is produced directly from the project's [github repository](https://github.com/XMtRa/persistence_anonymity_anon). You can download the material and the data, file an issue, or submit a pull request.

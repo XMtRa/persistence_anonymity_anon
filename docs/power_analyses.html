@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.6.40">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Effects of persistence and anonymity on political opinion expression - Power Analyses</title>
+<title>Power Analyses – Effects of persistence and anonymity on political opinion expression</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -69,10 +69,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-6bd9cfa162949bde0a231f530c97869d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -128,10 +128,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link" href="./analyses_words_new.html"> 
 <span class="menu-text">Analyses Using Words</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./data_wrangling.html"> 
-<span class="menu-text">Data Preparation</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./power_analyses.html" aria-current="page"> 
@@ -148,13 +144,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="https://github.com/XMtRa/privacy_calc_exp_anon"> <i class="bi bi-fa-lg fa-github" role="img">
+    <a class="nav-link" href="https://github.com/XMtRa/privacy_calc_exp_anon"> <i class="bi bi-fa-github" role="img">
 </i> 
 <span class="menu-text">Source Code</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/XMtRa/persistence_anonymity_anon/blob/main/data/data.csv"> <i class="bi bi-fa-database" role="img">
+</i> 
+<span class="menu-text">Data</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -605,22 +606,22 @@ persistence  0  1
 <tr class="odd">
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.15</td>
+<td style="text-align: right;">-0.1460706</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-0.03</td>
+<td style="text-align: right;">-0.0326302</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.45</td>
+<td style="text-align: right;">-0.4490249</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-0.19</td>
+<td style="text-align: right;">-0.1929650</td>
 </tr>
 </tbody>
 </table>
@@ -637,20 +638,20 @@ Call:
 lm(formula = expressions ~ persistence + anonymity, data = d)
 
 Residuals:
-   Min     1Q Median     3Q    Max 
--3.011 -0.675 -0.029  0.691  3.792 
+    Min      1Q  Median      3Q     Max 
+-3.0111 -0.6753 -0.0290  0.6915  3.7920 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  -0.1817     0.0577   -3.15  0.00170 ** 
-persistence  -0.2316     0.0667   -3.47  0.00054 ***
-anonymity     0.1848     0.0667    2.77  0.00570 ** 
+(Intercept) -0.18173    0.05775  -3.147 0.001701 ** 
+persistence -0.23164    0.06668  -3.474 0.000536 ***
+anonymity    0.18475    0.06668   2.771 0.005702 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1 on 957 degrees of freedom
-Multiple R-squared:  0.0202,    Adjusted R-squared:  0.0182 
-F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
+Residual standard error: 1.033 on 957 degrees of freedom
+Multiple R-squared:  0.02022,   Adjusted R-squared:  0.01817 
+F-statistic: 9.873 on 2 and 957 DF,  p-value: 5.702e-05</code></pre>
 </div>
 </div>
 <p>Results look reasonable. Both persistence and anonymity reduce disclosure.</p>
@@ -688,7 +689,7 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>t2 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
 <span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>t2 <span class="sc">-</span> t1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time difference of 43 secs</code></pre>
+<pre><code>Time difference of 30.5522 secs</code></pre>
 </div>
 </div>
 </section>
@@ -769,48 +770,48 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.2036146</td>
+<td style="text-align: right;">0.0005666</td>
+<td style="text-align: right;">-0.3999596</td>
+<td style="text-align: right;">-0.1994476</td>
+<td style="text-align: right;">-0.1981796</td>
+<td style="text-align: right;">0.2023466</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.1989367</td>
+<td style="text-align: right;">-0.0033509</td>
+<td style="text-align: right;">-0.3990509</td>
+<td style="text-align: right;">-0.2003664</td>
+<td style="text-align: right;">-0.1985648</td>
+<td style="text-align: right;">0.1971352</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.1990174</td>
+<td style="text-align: right;">0.0010106</td>
+<td style="text-align: right;">-0.3973053</td>
+<td style="text-align: right;">-0.2033331</td>
+<td style="text-align: right;">-0.2013158</td>
+<td style="text-align: right;">0.1970001</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.1976968</td>
+<td style="text-align: right;">-0.0017485</td>
+<td style="text-align: right;">-0.3996051</td>
+<td style="text-align: right;">-0.2018917</td>
+<td style="text-align: right;">-0.2010258</td>
+<td style="text-align: right;">0.1968309</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.4</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">-0.2</td>
-<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">-0.1963275</td>
+<td style="text-align: right;">-0.0035055</td>
+<td style="text-align: right;">-0.3982119</td>
+<td style="text-align: right;">-0.2004496</td>
+<td style="text-align: right;">-0.1994143</td>
+<td style="text-align: right;">0.1952921</td>
 </tr>
 </tbody>
 </table>
@@ -842,32 +843,32 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">240</td>
-<td style="text-align: right;">0.34</td>
-<td style="text-align: right;">0.34</td>
+<td style="text-align: right;">0.335</td>
+<td style="text-align: right;">0.344</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">480</td>
-<td style="text-align: right;">0.58</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.584</td>
+<td style="text-align: right;">0.569</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">720</td>
-<td style="text-align: right;">0.77</td>
-<td style="text-align: right;">0.76</td>
+<td style="text-align: right;">0.771</td>
+<td style="text-align: right;">0.758</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">960</td>
-<td style="text-align: right;">0.86</td>
-<td style="text-align: right;">0.87</td>
+<td style="text-align: right;">0.864</td>
+<td style="text-align: right;">0.866</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1200</td>
-<td style="text-align: right;">0.93</td>
-<td style="text-align: right;">0.92</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">0.917</td>
 </tr>
 </tbody>
 </table>
@@ -998,48 +999,48 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.7</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.3529767</td>
+<td style="text-align: right;">0.0016533</td>
+<td style="text-align: right;">-0.7008929</td>
+<td style="text-align: right;">-0.3525972</td>
+<td style="text-align: right;">-0.3510833</td>
+<td style="text-align: right;">0.3514628</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.7</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.3488914</td>
+<td style="text-align: right;">0.0030501</td>
+<td style="text-align: right;">-0.6995804</td>
+<td style="text-align: right;">-0.3545085</td>
+<td style="text-align: right;">-0.3541238</td>
+<td style="text-align: right;">0.3485067</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.7</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.3504833</td>
+<td style="text-align: right;">0.0010607</td>
+<td style="text-align: right;">-0.6964101</td>
+<td style="text-align: right;">-0.3487588</td>
+<td style="text-align: right;">-0.3478731</td>
+<td style="text-align: right;">0.3495976</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.7</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.3494230</td>
+<td style="text-align: right;">-0.0014467</td>
+<td style="text-align: right;">-0.6983255</td>
+<td style="text-align: right;">-0.3508370</td>
+<td style="text-align: right;">-0.3491464</td>
+<td style="text-align: right;">0.3477324</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">-0.7</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">-0.35</td>
-<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.3519374</td>
+<td style="text-align: right;">0.0031855</td>
+<td style="text-align: right;">-0.6978309</td>
+<td style="text-align: right;">-0.3493555</td>
+<td style="text-align: right;">-0.3492172</td>
+<td style="text-align: right;">0.3517991</td>
 </tr>
 </tbody>
 </table>
@@ -1070,32 +1071,32 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.79</td>
-<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.792</td>
+<td style="text-align: right;">0.767</td>
 <td style="text-align: right;">240</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0.97</td>
-<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">0.971</td>
+<td style="text-align: right;">0.966</td>
 <td style="text-align: right;">480</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.997</td>
+<td style="text-align: right;">0.997</td>
 <td style="text-align: right;">720</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.999</td>
+<td style="text-align: right;">1.000</td>
 <td style="text-align: right;">960</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
 <td style="text-align: right;">1200</td>
 </tr>
 </tbody>
@@ -1147,32 +1148,32 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">240</td>
-<td style="text-align: right;">0.34</td>
-<td style="text-align: right;">0.34</td>
+<td style="text-align: right;">0.335</td>
+<td style="text-align: right;">0.344</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">480</td>
-<td style="text-align: right;">0.58</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.584</td>
+<td style="text-align: right;">0.569</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">720</td>
-<td style="text-align: right;">0.77</td>
-<td style="text-align: right;">0.76</td>
+<td style="text-align: right;">0.771</td>
+<td style="text-align: right;">0.758</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">960</td>
-<td style="text-align: right;">0.86</td>
-<td style="text-align: right;">0.87</td>
+<td style="text-align: right;">0.864</td>
+<td style="text-align: right;">0.866</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1200</td>
-<td style="text-align: right;">0.93</td>
-<td style="text-align: right;">0.92</td>
+<td style="text-align: right;">0.934</td>
+<td style="text-align: right;">0.917</td>
 </tr>
 </tbody>
 </table>
@@ -1201,32 +1202,32 @@ F-statistic: 9.87 on 2 and 957 DF,  p-value: 0.000057</code></pre>
 <tr class="odd">
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">240</td>
-<td style="text-align: right;">0.79</td>
-<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.792</td>
+<td style="text-align: right;">0.767</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">480</td>
-<td style="text-align: right;">0.97</td>
-<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">0.971</td>
+<td style="text-align: right;">0.966</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
 <td style="text-align: right;">720</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.997</td>
+<td style="text-align: right;">0.997</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">960</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.999</td>
+<td style="text-align: right;">1.000</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1200</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">1.000</td>
 </tr>
 </tbody>
 </table>
@@ -1314,18 +1315,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1357,7 +1347,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -1365,7 +1375,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
@@ -1462,7 +1472,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

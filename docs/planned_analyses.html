@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.6.40">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Effects of persistence and anonymity on political opinion expression - Planned analyses</title>
+<title>Planned analyses – Effects of persistence and anonymity on political opinion expression</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -69,10 +69,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-6bd9cfa162949bde0a231f530c97869d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -128,10 +128,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link" href="./analyses_words_new.html"> 
 <span class="menu-text">Analyses Using Words</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./data_wrangling.html"> 
-<span class="menu-text">Data Preparation</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./power_analyses.html"> 
@@ -148,13 +144,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="https://github.com/XMtRa/privacy_calc_exp_anon"> <i class="bi bi-fa-lg fa-github" role="img">
+    <a class="nav-link" href="https://github.com/XMtRa/privacy_calc_exp_anon"> <i class="bi bi-fa-github" role="img">
 </i> 
 <span class="menu-text">Source Code</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://github.com/XMtRa/persistence_anonymity_anon/blob/main/data/data.csv"> <i class="bi bi-fa-database" role="img">
+</i> 
+<span class="menu-text">Data</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -260,23 +261,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>,  </span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">chains =</span> <span class="dv">2</span>,</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">zero_inflated_poisson</span>(<span class="st">"log"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
-using C compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
-using SDK: ‘MacOSX14.4.sdk’
-clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include" -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
-In file included from &lt;built-in&gt;:1:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
-/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: 'cmath' file not found
-#include &lt;cmath&gt;
-         ^~~~~~~
-1 error generated.
-make: *** [foo.o] Error 1</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_fe)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_fe)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> Family: zero_inflated_poisson 
   Links: mu = log; zi = identity 
@@ -288,27 +275,27 @@ Formula: expressions ~ 1 + persistence * anonymity + (1 | topic) + (1 | group)
 Multilevel Hyperparameters:
 ~group (Number of levels: 48) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(Intercept)     0.03      0.02     0.00     0.08 1.01    17434    53849
+sd(Intercept)     0.03      0.02     0.00     0.09 1.01    13744    40109
 
 ~topic (Number of levels: 3) 
               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sd(Intercept)     0.08      0.12     0.00     0.46 1.04     2745      924
+sd(Intercept)     0.09      0.14     0.00     0.44 1.05     2245      813
 
 Regression Coefficients:
                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept                 0.81      0.08     0.66     0.97 1.07     1655
-persistence              -0.10      0.05    -0.19    -0.01 1.01     8941
-anonymity                 0.12      0.05     0.03     0.21 1.01     8891
-persistence:anonymity     0.13      0.09    -0.06     0.31 1.01     8432
+Intercept                 0.81      0.07     0.67     0.94 1.06     2092
+persistence              -0.10      0.05    -0.19    -0.01 1.01     9585
+anonymity                 0.12      0.05     0.03     0.21 1.01    10175
+persistence:anonymity     0.12      0.09    -0.06     0.31 1.01     8376
                       Tail_ESS
-Intercept                 1128
-persistence              37367
-anonymity                59711
-persistence:anonymity    28623
+Intercept                 1220
+persistence              38273
+anonymity                63450
+persistence:anonymity    25836
 
 Further Distributional Parameters:
    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-zi     0.03      0.01     0.01     0.06 1.02     4874     3452
+zi     0.03      0.01     0.01     0.06 1.02     4681     5829
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -319,33 +306,19 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 <section id="random-effects" class="level3">
 <h3 class="anchored" data-anchor-id="random-effects">Random effects</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit_re <span class="ot">&lt;-</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">brm_multiple</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    expressions <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">+</span> </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">|</span> topic) <span class="sc">+</span> </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">|</span> group), </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> d,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">silent =</span> <span class="dv">2</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>, </span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">chains =</span> <span class="dv">2</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">zero_inflated_poisson</span>(<span class="st">"log"</span>)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Running /Library/Frameworks/R.framework/Resources/bin/R CMD SHLIB foo.c
-using C compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
-using SDK: ‘MacOSX14.4.sdk’
-clang -arch arm64 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG   -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/Rcpp/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/unsupported"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/BH/include" -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/src/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppParallel/include/"  -I"/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2  -c foo.c -o foo.o
-In file included from &lt;built-in&gt;:1:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Dense:1:
-In file included from /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/Core:19:
-/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: 'cmath' file not found
-#include &lt;cmath&gt;
-         ^~~~~~~
-1 error generated.
-make: *** [foo.o] Error 1</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_re)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit_re <span class="ot">&lt;-</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">brm_multiple</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    expressions <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">+</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">|</span> topic) <span class="sc">+</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      (<span class="dv">1</span> <span class="sc">+</span> persistence <span class="sc">*</span> anonymity <span class="sc">|</span> group), </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> d,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">silent =</span> <span class="dv">2</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">refresh =</span> <span class="dv">0</span>, </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">chains =</span> <span class="dv">2</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> <span class="fu">zero_inflated_poisson</span>(<span class="st">"log"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_re)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> Family: zero_inflated_poisson 
   Links: mu = log; zi = identity 
@@ -360,64 +333,64 @@ Multilevel Hyperparameters:
 sd(Intercept)                              0.03      0.02     0.00     0.09
 sd(persistence)                            0.06      0.05     0.00     0.18
 sd(anonymity)                              0.06      0.05     0.00     0.18
-sd(persistence:anonymity)                  0.13      0.10     0.00     0.36
-cor(Intercept,persistence)                -0.03      0.45    -0.82     0.80
-cor(Intercept,anonymity)                  -0.02      0.45    -0.83     0.80
-cor(persistence,anonymity)                 0.03      0.45    -0.80     0.82
+sd(persistence:anonymity)                  0.12      0.10     0.00     0.35
+cor(Intercept,persistence)                -0.03      0.45    -0.83     0.80
+cor(Intercept,anonymity)                  -0.01      0.45    -0.82     0.81
+cor(persistence,anonymity)                 0.03      0.45    -0.81     0.82
 cor(Intercept,persistence:anonymity)       0.03      0.45    -0.80     0.83
-cor(persistence,persistence:anonymity)    -0.02      0.45    -0.82     0.81
+cor(persistence,persistence:anonymity)    -0.02      0.45    -0.82     0.80
 cor(anonymity,persistence:anonymity)      -0.02      0.45    -0.82     0.80
                                        Rhat Bulk_ESS Tail_ESS
-sd(Intercept)                          1.01    30498    22262
-sd(persistence)                        1.00    48431    63936
-sd(anonymity)                          1.01    15705    13221
-sd(persistence:anonymity)              1.01    10178     6521
-cor(Intercept,persistence)             1.01    50963    35279
-cor(Intercept,anonymity)               1.01    10997     4004
-cor(persistence,anonymity)             1.00    62763    56409
-cor(Intercept,persistence:anonymity)   1.00    42269    60115
-cor(persistence,persistence:anonymity) 1.01    30295    73540
-cor(anonymity,persistence:anonymity)   1.01    21876    69623
+sd(Intercept)                          1.01    17536    44380
+sd(persistence)                        1.01    19179    49567
+sd(anonymity)                          1.01    27423    25849
+sd(persistence:anonymity)              1.01    21086    51097
+cor(Intercept,persistence)             1.01    17439    43783
+cor(Intercept,anonymity)               1.01    14408    22168
+cor(persistence,anonymity)             1.01     9238     3278
+cor(Intercept,persistence:anonymity)   1.01    14660    16370
+cor(persistence,persistence:anonymity) 1.01    29892    95587
+cor(anonymity,persistence:anonymity)   1.01    11672    35895
 
 ~topic (Number of levels: 3) 
                                        Estimate Est.Error l-95% CI u-95% CI
-sd(Intercept)                              0.12      0.17     0.00     0.64
-sd(persistence)                            0.28      0.34     0.01     1.28
-sd(anonymity)                              0.25      0.32     0.01     1.18
-sd(persistence:anonymity)                  0.40      0.50     0.01     1.87
-cor(Intercept,persistence)                -0.03      0.47    -0.84     0.82
-cor(Intercept,anonymity)                   0.02      0.47    -0.83     0.85
-cor(persistence,anonymity)                -0.05      0.46    -0.86     0.82
-cor(Intercept,persistence:anonymity)       0.02      0.46    -0.83     0.84
-cor(persistence,persistence:anonymity)    -0.03      0.46    -0.84     0.82
-cor(anonymity,persistence:anonymity)       0.02      0.46    -0.82     0.84
+sd(Intercept)                              0.12      0.17     0.00     0.62
+sd(persistence)                            0.28      0.35     0.01     1.27
+sd(anonymity)                              0.24      0.31     0.01     1.17
+sd(persistence:anonymity)                  0.42      0.59     0.01     2.08
+cor(Intercept,persistence)                -0.03      0.46    -0.84     0.82
+cor(Intercept,anonymity)                   0.02      0.46    -0.82     0.84
+cor(persistence,anonymity)                -0.05      0.47    -0.86     0.81
+cor(Intercept,persistence:anonymity)       0.02      0.46    -0.82     0.84
+cor(persistence,persistence:anonymity)    -0.04      0.46    -0.85     0.81
+cor(anonymity,persistence:anonymity)       0.02      0.46    -0.82     0.85
                                        Rhat Bulk_ESS Tail_ESS
-sd(Intercept)                          1.02     8353     2840
-sd(persistence)                        1.02     6855     2664
-sd(anonymity)                          1.01     9196     3439
-sd(persistence:anonymity)              1.02     9187     7182
-cor(Intercept,persistence)             1.01    20993    56190
-cor(Intercept,anonymity)               1.01    14624     6647
-cor(persistence,anonymity)             1.01    22094    18190
-cor(Intercept,persistence:anonymity)   1.00    50244    71238
-cor(persistence,persistence:anonymity) 1.01    14783    35239
-cor(anonymity,persistence:anonymity)   1.01    34864    40821
+sd(Intercept)                          1.02     6204     2206
+sd(persistence)                        1.01    10929     7453
+sd(anonymity)                          1.01    10454     6697
+sd(persistence:anonymity)              1.04     2876     1164
+cor(Intercept,persistence)             1.01    21790    18450
+cor(Intercept,anonymity)               1.01    21695    57354
+cor(persistence,anonymity)             1.02     7616     4088
+cor(Intercept,persistence:anonymity)   1.01    21972    35474
+cor(persistence,persistence:anonymity) 1.01    25380    54882
+cor(anonymity,persistence:anonymity)   1.01    16162    32143
 
 Regression Coefficients:
                       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-Intercept                 0.81      0.10     0.60     1.02 1.03     3534
-persistence              -0.10      0.21    -0.60     0.34 1.03     4376
-anonymity                 0.12      0.20    -0.31     0.56 1.02     5889
-persistence:anonymity     0.12      0.33    -0.59     0.84 1.02     8115
+Intercept                 0.82      0.10     0.62     1.04 1.04     3243
+persistence              -0.10      0.21    -0.56     0.36 1.01     8330
+anonymity                 0.12      0.18    -0.29     0.52 1.01    10602
+persistence:anonymity     0.15      0.44    -0.54     1.00 1.04     2758
                       Tail_ESS
-Intercept                 2553
-persistence               1755
-anonymity                 2891
-persistence:anonymity     7981
+Intercept                 1639
+persistence               7268
+anonymity                 6515
+persistence:anonymity     1165
 
 Further Distributional Parameters:
    Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-zi     0.03      0.01     0.01     0.06 1.01     8739    53150
+zi     0.03      0.01     0.01     0.06 1.03     4211     2437
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -466,18 +439,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -509,7 +471,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -517,7 +499,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
@@ -614,7 +596,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

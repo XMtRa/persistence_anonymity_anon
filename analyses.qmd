@@ -23,6 +23,7 @@ library(kableExtra)
 library(lme4)
 library(lmerTest)
 library(rmarkdown)
+library(naniar)
 library(performance)
 library(see)
 library(sjmisc)
@@ -82,6 +83,27 @@ contrasts(d$anonymity_dev) <- contr.sum(2)
 d$persistence_dev <- factor(d$persistence)
 contrasts(d$persistence_dev) <- contr.sum(2)
 ```
+
+# Missing data
+
+Let's first inspect how much data is missing
+
+```{r}
+# Filter variables used for analyses
+d_filt <- d |> 
+  select(age, gender, pol_stance, topic, persistence, persistence_dev, anonymity, anonymity_dev, op_expr)
+
+# Summary
+miss_var_summary(d_filt)       # % missing per variable
+miss_case_summary(d_filt)      # % missing per row
+
+# Visualization
+vis_miss(d_filt)               # Heatmap of missingness
+gg_miss_var(d_filt)            # Bar plot: missing per variable
+gg_miss_case(d_filt)           # Bar plot: missing per case
+```
+
+Shows that there are nore missing data for the variables we'll analyse. Hence, no imputing necessary.
 
 # Descriptives
 
@@ -571,18 +593,20 @@ Again, no main or interaction effects.
 Let's see if the random effects model fits better
 
 ```{r random-effects-model-1-comp}
+cores <- parallel::detectCores()
+
 fit_fe_1 <- add_criterion(
   fit_fe_1
   , "kfold" 
-  , K = 10
-  , cores = 4
+  , K = 5
+  , cores = cores
   )
 
 fit_re_1 <- add_criterion(
   fit_re_1
   , "kfold"
-  , K = 10
-  , cores = 4
+  , K = 5
+  , cores = cores
   )
 
 comp_1 <- loo_compare(fit_fe_1, fit_re_1, criterion = "kfold")
@@ -623,12 +647,12 @@ Shows significant effect of anonymity on opinion expression.
 
 Let's compare models.
 
-```{r}
+```{r comp-null-model}
 fit_nm_1 <- add_criterion(
   fit_nm_1
   , "kfold"
-  , K = 10
-  , cores = 4
+  , K = 5
+  , cores = cores
   )
 
 comp_2 <- loo_compare(fit_fe_1, fit_nm_1, criterion = "kfold")

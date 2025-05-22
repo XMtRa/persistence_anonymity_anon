@@ -359,29 +359,6 @@ summary(fit_re_1)
 
 Again, no main or interaction effects. 
 
-Let's see if the random effects model fits better
-
-```{r random-effects-model-1-comp}
-fit_fe_1 <- add_criterion(
-  fit_fe_1
-  , "kfold" 
-  , K = 10
-  , cores = 4
-  )
-
-fit_re_1 <- add_criterion(
-  fit_re_1
-  , "kfold"
-  , K = 10
-  , cores = 4
-  )
-
-comp_1 <- loo_compare(fit_fe_1, fit_re_1, criterion = "kfold")
-comp_1
-```
-
-Although model comparisons showed that the model with random effects fitted better, the difference was not significant (Δ ELPD = `r comp_1[2] |> round(2)`, 95% CI [`r comp_1[2] - comp_1[4] * 1.96 |> round(2)`, `r comp_1[2] + comp_1[4] * 1.96 |> round(2)`]. Hence, for reasons of parsimony the model with fixed effects is preferred.
-
 ## Hurdle
 
 Let's now estimate a fixed effects model with hurdles. 

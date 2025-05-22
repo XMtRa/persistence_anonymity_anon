@@ -12,8 +12,6 @@ website:
         href: analyses.qmd
       - text: "Analyses Using Words"
         href: analyses_words_new.qmd
-      - text: "Data Preparation"
-        href: data_wrangling.qmd
       - text: "Power Analysis"
         href: power_analyses.qmd
       - text: "Planned Analysis"
